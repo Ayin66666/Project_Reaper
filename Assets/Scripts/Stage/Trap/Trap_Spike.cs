@@ -8,12 +8,14 @@ public class Trap_Spike : Trap_Base
     [Header("--- Spike Setting ---")]
     [SerializeField] private SpikeType type;
     [SerializeField] private int damage;
-    [SerializeField] private Animator[] anim;
-    [SerializeField] private Transform resetPos;
     private enum SpikeType { None, Move }
 
     [Header("---Object---")]
     [SerializeField] private GameObject spikeObject;
+
+    [Header("--- Pos Setting ---")]
+    [SerializeField] private Transform resetPos;
+    [SerializeField] private Transform[] spawnMovePos;
 
     public override void TrapActivate(bool activate)
     {
@@ -23,10 +25,7 @@ public class Trap_Spike : Trap_Base
             switch (type)
             {
                 case SpikeType.None:
-                    for (int i = 0; i < anim.Length; i++)
-                    {
-                        anim[i].SetBool("isAttack", isActivate);
-                    }
+                    spikeObject.SetActive(true);
                     break;
 
                 case SpikeType.Move:
@@ -42,13 +41,36 @@ public class Trap_Spike : Trap_Base
 
     private IEnumerator SpawnMove(bool isOn)
     {
-        // Spike On
-        for (int i = 0; i < anim.Length; i++)
-        {
-            anim[i].SetBool("isAttack", isOn);
+        float timer = 0;
 
+        if (isOn)
+        {
+            // Spike On
+            spikeObject.SetActive(true);
+            Vector2 startPos = spawnMovePos[0].position;
+            Vector2 endPos = spawnMovePos[1].position;
+            while(timer < 1)
+            {
+                timer += Time.deltaTime;
+                spikeObject.transform.position = Vector2.Lerp(startPos, endPos, EasingFunctions.OutExpo(timer));
+                yield return null;
+            }
+            spikeObject.transform.position = endPos;
         }
-        yield return null;
+        else
+        {
+            // Spike Off
+            Vector2 startPos = spawnMovePos[1].position;
+            Vector2 endPos = spawnMovePos[0].position;
+            while(timer < 1)
+            {
+                timer += Time.deltaTime;
+                spikeObject.transform.position = Vector2.Lerp(startPos, endPos, EasingFunctions.OutExpo(timer));
+                yield return null;
+            }
+            spikeObject.transform.position = endPos;
+            spikeObject.SetActive(false);
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)

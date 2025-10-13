@@ -67,9 +67,6 @@ public class Stage_Room_Manager : Stage_Room_Base
 
             case RoomType.Boss:
                 StartCoroutine(Boss_Check());
-
-                // 보스 BGM 동작
-                room_Manager.BossRoom_Sound();
                 break;
         }
     }

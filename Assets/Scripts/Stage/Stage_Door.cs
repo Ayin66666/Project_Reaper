@@ -1,7 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using Easing;
+using System.Collections;
+using UnityEngine;
+
 
 public class Stage_Door : MonoBehaviour
 {
@@ -15,6 +15,7 @@ public class Stage_Door : MonoBehaviour
 
     public void Door_Setting(bool isOn)
     {
+        if(curCoroutine != null) StopCoroutine(curCoroutine);
         if (isOn)
         {
             curCoroutine = StartCoroutine(DoorMove(movePos[1].position, true));
@@ -32,8 +33,6 @@ public class Stage_Door : MonoBehaviour
         {
             doorCollider.enabled = true;
         }
-
-        Debug.Log("Call B");
 
         // Door move
         Vector2 startPos = doorObject.transform.position;

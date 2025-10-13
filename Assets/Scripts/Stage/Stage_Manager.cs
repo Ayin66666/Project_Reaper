@@ -1,13 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
 
 public class Stage_Manager : MonoBehaviour
 {
     [Header("---Start Setting---")]
     [SerializeField] private AudioSource bgmSound;
-    [SerializeField] private AudioClip[] audioClips;
     [SerializeField] private bool haveStartBGM;
     public bool isUI;
 
@@ -51,7 +51,6 @@ public class Stage_Manager : MonoBehaviour
     [SerializeField] private GameObject waitingUI;
     [SerializeField] private Text waitingText;
 
-
     private void Start()
     {
         // Player Find
@@ -63,7 +62,6 @@ public class Stage_Manager : MonoBehaviour
         // BGM Play
         if(haveStartBGM)
         {
-            bgmSound.clip = audioClips[0];
             bgmSound.Play();
         }
 
@@ -74,13 +72,6 @@ public class Stage_Manager : MonoBehaviour
     private void Update()
     {
         Timer();
-    }
-
-    public void BossRoom_Sound()
-    {
-        bgmSound.Stop();
-        bgmSound.clip = audioClips[1];
-        bgmSound.Play();
     }
 
     private IEnumerator StartUI()
