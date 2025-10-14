@@ -46,7 +46,6 @@ public class Enemy_Strengthened_Melee : Enemy_Base
         {
             return;
         }
-        Debug.DrawRay(transform.position, new Vector2(transform.localScale.x, 0), Color.red);
 
         // Find Target & Reset Enemy
         if (!haveTarget)
@@ -77,6 +76,7 @@ public class Enemy_Strengthened_Melee : Enemy_Base
         CurTarget_Check();
         LookAt();
 
+        if (hitStopCoroutine != null) StopCoroutine(hitStopCoroutine);
         if (targetDir < chaseRange)
         {
             int ran = Random.Range(0, 100);
@@ -155,32 +155,6 @@ public class Enemy_Strengthened_Melee : Enemy_Base
 
         // Chase
         hitStopCoroutine = StartCoroutine(Chase());
-
-        /*
-        // Jump
-        Vector2 startPos = transform.position;
-        float heightY = endPos.y; // 점프 올라갈 값
-        float timer = 0f; // 타이머
-        while(timer < 1)
-        {
-            timer += Time.deltaTime;
-            float heightT = wallJumpCurve.Evaluate(timer); // 애니메이션 커브에서 가져올 값
-            float height = Mathf.Lerp(0f, heightY, heightT); // 점프(y)에 대한 러프
-            transform.position = Vector2.Lerp(startPos, endPos, EasingFunctions.InOutQuart(timer)) + new Vector2(0f, height); // 이동값 + 점프값
-            yield return null;
-        }
-
-        anim.SetFloat("Move", 0);
-        rigid.gravityScale = 1f;
-        isJump = false;
-        isGround = true;
-        
-        // Delay
-        yield return new WaitForSeconds(1f);
-
-        // Chase
-        hitStopCoroutine = StartCoroutine(Chase());
-        */
     }
 
     Vector2 CalculateParabolicPosition(Vector2 start, Vector2 end, float height, float t)
@@ -199,23 +173,6 @@ public class Enemy_Strengthened_Melee : Enemy_Base
         position += tt * end;
 
         return position;
-
-        /*
-        float u = 1 - t;
-        float tt = t * t;
-        float uu = u * u;
-
-        // 두 점 사이의 중간점을 계산하고 높이를 추가합니다.
-        Vector2 midpoint = (start + end) / 2;
-        midpoint += Vector2.up * height;
-
-        // 베지어 곡선의 계산
-        Vector2 position = uu * start;
-        position += 2 * u * t * midpoint;
-        position += tt * end;
-
-        return position;
-        */
     }
 
     private IEnumerator NormalAttack()
@@ -369,7 +326,6 @@ public class Enemy_Strengthened_Melee : Enemy_Base
 
     private void WallCheck()
     {
-        //RaycastHit2D hit = Physics2D.Raycast(transform.position, new Vector2(transform.localScale.x, transform.position.y + 1f), aiCollider.bounds.size.x + 0.5f, jumpWallCheck);
         RaycastHit2D hit = Physics2D.Raycast(transform.position, new Vector2(transform.localScale.x, 0), aiCollider.bounds.size.x + 0.5f, jumpWallCheck);
         if(hit.collider != null )
         {
@@ -429,7 +385,12 @@ public class Enemy_Strengthened_Melee : Enemy_Base
 
     public override void Die()
     {
+        if (hitStopCoroutine != null) StopCoroutine(hitStopCoroutine);
+        if (hitAirborneCoroutine != null) StopCoroutine(hitAirborneCoroutine);
+        if (hitKnockbackCoroutine != null) StopCoroutine(hitKnockbackCoroutine);
+        if (hitDownAttackCoroutine != null) StopCoroutine(hitDownAttackCoroutine);
         StopAllCoroutines();
+
         StartCoroutine(DieCall());
     }
 

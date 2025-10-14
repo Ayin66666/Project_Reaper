@@ -1,6 +1,6 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+
 
 public class Stage_Room_Manager : Stage_Room_Base
 {
@@ -86,12 +86,9 @@ public class Stage_Room_Manager : Stage_Room_Base
         // Player Check
         while(!clearChecker.isClear)
         {
-            Debug.Log("Call wait");
-
             yield return null;
         }
 
-        Debug.Log("Call End");
         room_Manager.Room_Clear();
         RoomEnd();
     }

@@ -48,12 +48,6 @@ public class Enemy_Normal_Tower : Enemy_Base
             haveTarget = false;
         }
 
-        // Test
-        if (Input.GetKeyDown(KeyCode.K))
-        {
-            // StartCoroutine(DashAttack());
-        }
-
         // Think
         if (state == State.Idle && !isAttack && !isDie)
         {
@@ -69,14 +63,8 @@ public class Enemy_Normal_Tower : Enemy_Base
     {
         state = State.Think;
 
-        if (attackCount >= 5)
-        {
-            StartCoroutine(CircleShot());
-        }
-        else
-        {
-            StartCoroutine(NormalShot());
-        }
+        if(hitStopCoroutine != null) StopCoroutine(hitStopCoroutine);
+        hitStopCoroutine = StartCoroutine(attackCount >= 5 ? CircleShot() : NormalShot());
     }
 
     private IEnumerator NormalShot()
@@ -242,6 +230,12 @@ public class Enemy_Normal_Tower : Enemy_Base
 
     public override void Die()
     {
+        if (hitStopCoroutine != null) StopCoroutine(hitStopCoroutine);
+        if (hitAirborneCoroutine != null) StopCoroutine(hitAirborneCoroutine);
+        if (hitKnockbackCoroutine != null) StopCoroutine(hitKnockbackCoroutine);
+        if (hitDownAttackCoroutine != null) StopCoroutine(hitDownAttackCoroutine);
+        StopAllCoroutines();
+
         StartCoroutine(DieCall());
     }
 
@@ -249,6 +243,7 @@ public class Enemy_Normal_Tower : Enemy_Base
     {
         state = State.Die;
         isDie = true;
+        line.enabled = false;
 
         // UI √ ±‚»≠
         statusUI_Normal.Die();

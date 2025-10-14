@@ -16,6 +16,7 @@ public abstract class Enemy_Base : MonoBehaviour
     [SerializeField] protected SpriteRenderer spriteRenderer;
     public Enemy_StatusDataSO status;
 
+
     [Header("---State---")]
     public float maxAirborneTimer;
     public float airBorneTimer;
@@ -36,9 +37,10 @@ public abstract class Enemy_Base : MonoBehaviour
 
     // Hit Coroutine
     protected Coroutine hitStopCoroutine;
-    private Coroutine hitAirborneCoroutine;
-    private Coroutine hitKnockbackCoroutine;
-    private Coroutine hitDownAttackCoroutine;
+    protected Coroutine hitInvincibilityCoroutine;
+    protected Coroutine hitAirborneCoroutine;
+    protected Coroutine hitKnockbackCoroutine;
+    protected Coroutine hitDownAttackCoroutine;
 
     protected enum EnemyType { Normal, Tower, Part, Object, Boss, BossTower }
     [SerializeField] protected EnemyType enemyType;
@@ -58,6 +60,7 @@ public abstract class Enemy_Base : MonoBehaviour
     [HideInInspector] public int criticalChance;
     [HideInInspector] public float criticalMultiplier;
     public string enemyName;
+    public string enemySudName;
     protected float attackSpeed;
     protected int score;
 
@@ -68,9 +71,11 @@ public abstract class Enemy_Base : MonoBehaviour
     protected float targetDir;
     protected List<GameObject> targetList = new List<GameObject>();
 
+
     [Header("---Animtion---")]
     [SerializeField] protected string[] animationTrigger;
     [SerializeField] protected string[] animationbool;
+
 
     protected void Status_Setting()
     {
@@ -197,25 +202,21 @@ public abstract class Enemy_Base : MonoBehaviour
         if (damage > 0)
         {
             // 피격 무적
-            StartCoroutine(HitInvincible());
-            switch (enemyType)
-            {
-                case EnemyType.Normal:
-                case EnemyType.Tower:
-                case EnemyType.Part:
-                case EnemyType.Object:
-                    statusUI_Normal.Hp();
-                    statusUI_Normal.AirBorne();
-                    break;
-
-                case EnemyType.Boss:
-                case EnemyType.BossTower:
-                    break;
-
-            }
+            if (hitInvincibilityCoroutine != null) StopCoroutine(hitInvincibilityCoroutine);
+            hitInvincibilityCoroutine = StartCoroutine(HitInvincible());
 
             // Hit Sound
             sound.SoundPlay_public(Enemy_Sound.PublicSound.Hit);
+
+            if (enemyType == EnemyType.Boss)
+            {
+                statusUI_Boss.Hp();
+            }
+            else
+            {
+                statusUI_Normal.Hp();
+                statusUI_Normal.AirBorne();
+            }
 
             // Attack Type Check
             if (canHitEffect) // -> 이 부분에 에러가 있음 -> 비활성화 되서 동작 안한느듯?
@@ -223,18 +224,11 @@ public abstract class Enemy_Base : MonoBehaviour
                 switch (hitType)
                 {
                     case HitType.None:
-                        // 추가적인 기능이 없음 -> 에어본 기간 증가?
-                        if (isAirBorne)
-                        {
-                            TimerAdd(t);
-                        }
+                        if (isAirBorne) TimerAdd(t);
                         break;
 
                     case HitType.Stagger:
-                        if(isAirBorne)
-                        {
-                            TimerAdd(t);
-                        }
+                        if(isAirBorne) TimerAdd(t);
                         HitStopCoroutine();
                         StopHitMoveCoroutine();
                         break;
@@ -252,13 +246,7 @@ public abstract class Enemy_Base : MonoBehaviour
                         break;
 
                     case HitType.KnockBack:
-                        if (isAirBorne)
-                        {
-                            TimerAdd(t);
-                        }
-
-                        Debug.Log("Call KnockBack");
-
+                        if (isAirBorne) TimerAdd(t);
                         HitStopCoroutine();
                         StopHitMoveCoroutine();
                         hitKnockbackCoroutine = StartCoroutine(KnockBackMove(player, t));
@@ -267,7 +255,7 @@ public abstract class Enemy_Base : MonoBehaviour
             }
 
             // Damage cal
-            StartCoroutine(HitEffect(player, hitCount, damage, isCritcal));
+            StartCoroutine(HitEffect(hitCount, damage, isCritcal));
         }
     }
 
@@ -276,10 +264,7 @@ public abstract class Enemy_Base : MonoBehaviour
         switch (enemyType)
         {
             case EnemyType.Normal:
-                if(hitStopCoroutine != null)
-                {
-                    StopCoroutine(hitStopCoroutine);
-                }
+                if(hitStopCoroutine != null) StopCoroutine(hitStopCoroutine);
                 state = State.Groggy;
                 isAttack = false;
                 break;
@@ -317,19 +302,13 @@ public abstract class Enemy_Base : MonoBehaviour
         }
     }
 
-    private IEnumerator HitEffect(GameObject player, int hitCount, int damage, bool isCritcal)
+    private IEnumerator HitEffect(int hitCount, int damage, bool isCritcal)
     {
         for (int i = 0; i < hitCount; i++)
         {
             // Damage Cal -> 타격 횟수만큼 데미지를 나눠서 출력
             int calDamage = (int)(damage / hitCount);
             hp -= calDamage;
-
-            // 사망 체크
-            if (hp <= 0)
-            {
-                Die();
-            }
 
             // 데미지 UI
             switch (enemyType)
@@ -342,10 +321,16 @@ public abstract class Enemy_Base : MonoBehaviour
 
                 case EnemyType.Boss:
                 case EnemyType.BossTower:
-                    //statusUI_Boss.DamageUI(isCritcal, calDamage);
+                    statusUI_Boss.DamageUI(isCritcal, calDamage);
                     break;
             }
 
+            // 사망 체크
+            if (hp <= 0)
+            {
+                Die();
+                break;
+            }
             // Effect Delay
             yield return new WaitForSeconds(0.05f);
         }
@@ -369,6 +354,7 @@ public abstract class Enemy_Base : MonoBehaviour
             airBorneTimer += time;
         }
     }
+
     protected void TimerCheck()
     {
         if (isAirBorneMove)
@@ -488,6 +474,7 @@ public abstract class Enemy_Base : MonoBehaviour
         }
     }
 
+
     protected void GroundCheck()
     {
         RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, aiCollider.bounds.size.y + 0.15f, groundLayer);
@@ -506,22 +493,11 @@ public abstract class Enemy_Base : MonoBehaviour
             isAirBorne = false;
             airBorneTimer = 0;
         }
-
-        /*
-        else if(rigid.velocity.y <= 0)
-        {
-            isGround = hit;
-            Debug.DrawRay(transform.position, Vector2.down, Color.red, 0.5f);
-            if (isGround)
-            {
-                isAirBorne = false;
-                airBorneTimer = 0;
-            }
-        }
-        */
     }
 
     protected abstract void Spawn();
+
     protected abstract void Stagger();
+
     public abstract void Die();
 }

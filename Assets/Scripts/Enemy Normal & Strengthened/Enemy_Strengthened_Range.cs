@@ -57,12 +57,6 @@ public class Enemy_Strengthened_Range : Enemy_Base
         TimerCheck();
         GroundCheck();
 
-        // Test
-        if (Input.GetKeyDown(KeyCode.K))
-        {
-            // StartCoroutine(DashAttack());
-        }
-
         // Think
         if (state == State.Idle && !isAttack && !isDie)
         {
@@ -73,6 +67,7 @@ public class Enemy_Strengthened_Range : Enemy_Base
             return;
         }
     }
+
 
     private void Think()
     {
@@ -87,6 +82,7 @@ public class Enemy_Strengthened_Range : Enemy_Base
         {
             // Attack Setting
             int ran = Random.Range(0, 100);
+            if(hitStopCoroutine != null) StopCoroutine(hitStopCoroutine);
             if (targetDir <= 1.5f)
             {
                 // Melee Attack
@@ -95,14 +91,7 @@ public class Enemy_Strengthened_Range : Enemy_Base
             else
             {
                 // Ranage Attack
-                if (ran <= 50)
-                {
-                    hitStopCoroutine = StartCoroutine(NormalShot());
-                }
-                else
-                {
-                    hitStopCoroutine = StartCoroutine(ContinuousShot());
-                }
+                hitStopCoroutine = StartCoroutine(ran <= 50 ? NormalShot() : ContinuousShot());
             }
         }
         else
@@ -111,6 +100,7 @@ public class Enemy_Strengthened_Range : Enemy_Base
             LookAt();
             if (groundCheck.isGround)
             {
+                if (hitStopCoroutine != null) StopCoroutine(hitStopCoroutine);
                 hitStopCoroutine = StartCoroutine(Chase());
             }
             else
@@ -131,16 +121,8 @@ public class Enemy_Strengthened_Range : Enemy_Base
         {
             CurTarget_Check();
             LookAt();
-            if(isGround)
-            {
-                rigid.velocity = new Vector2(targetVector.normalized.x * moveSpeed, rigid.velocity.y);
+            rigid.velocity = new Vector2(targetVector.normalized.x * moveSpeed * (isGround ? 1 : 0.15f), rigid.velocity.y);
 
-            }
-            else
-            {
-                rigid.velocity = new Vector2(targetVector.normalized.x * moveSpeed * 0.15f, rigid.velocity.y);
-
-            }
             yield return null;
         }
         anim.SetFloat("Move", 0);
@@ -160,7 +142,6 @@ public class Enemy_Strengthened_Range : Enemy_Base
 
         Vector2 startPos = transform.position;
         Vector2 endPos = end;
-        //float height = end.y + 0.1f;
         float height = Mathf.Max(1.0f, Mathf.Abs(endPos.y - startPos.y) + 2.0f);
 
         float timer = 0;
@@ -227,6 +208,7 @@ public class Enemy_Strengthened_Range : Enemy_Base
         state = State.Attack;
         isAttack = true;
         LookAt();
+
         line.enabled = true;
         line.SetPosition(0, shotPos.position);
 
@@ -378,7 +360,12 @@ public class Enemy_Strengthened_Range : Enemy_Base
 
     public override void Die()
     {
+        if (hitStopCoroutine != null) StopCoroutine(hitStopCoroutine);
+        if (hitAirborneCoroutine != null) StopCoroutine(hitAirborneCoroutine);
+        if (hitKnockbackCoroutine != null) StopCoroutine(hitKnockbackCoroutine);
+        if (hitDownAttackCoroutine != null) StopCoroutine(hitDownAttackCoroutine);
         StopAllCoroutines();
+
         StartCoroutine(DieCall());
     }
 
@@ -386,6 +373,7 @@ public class Enemy_Strengthened_Range : Enemy_Base
     {
         state = State.Die;
         isDie = true;
+        line.enabled = false;
 
         // UI ÃÊ±âÈ­
         statusUI_Normal.Die();

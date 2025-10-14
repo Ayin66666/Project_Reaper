@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class Stage_Enemy_Spawner : MonoBehaviour
 {
     [Header("--- Spawner Setting ---")]
@@ -22,14 +23,15 @@ public class Stage_Enemy_Spawner : MonoBehaviour
     [SerializeField] private GameObject[] objectSpawnEnemys;
     [SerializeField] private Transform[] spawnPos;
     [SerializeField] private float spawnTimer;
+    [SerializeField] private GameObject spawnVFX;
     private float timer;
 
 
     [Header("---Boss Spawn SEtting---")]
     [SerializeField] private GameObject boss;
-
     private Coroutine curCorouttine;
     private Coroutine curCheckCoroutine;
+
 
     public void Spawn()
     {
@@ -108,6 +110,10 @@ public class Stage_Enemy_Spawner : MonoBehaviour
         enemyCount = enemys.Count;
         for (int i = 0; i < enemys.Count; i++)
         {
+            // ÀÌÆåÆ®
+            Instantiate(spawnVFX, enemys[i].transform.position, Quaternion.identity);
+
+            // ¸ó½ºÅÍ
             enemys[i].SetActive(true);
         }
 
@@ -131,6 +137,10 @@ public class Stage_Enemy_Spawner : MonoBehaviour
             for (int i2 = 0; i2 < spawnCount[i]; i2++)
             {
                 GameObject obj = Instantiate(objectSpawnEnemys[Random.Range(0, objectSpawnEnemys.Length)], spawnPos[Random.Range(0,spawnPos.Length)].position, Quaternion.identity);
+
+                // ÀÌÆåÆ®
+                Instantiate(spawnVFX, obj.transform.position, Quaternion.identity);
+
                 enemys.Add(obj);
                 enemyCount++;
             }
@@ -175,6 +185,9 @@ public class Stage_Enemy_Spawner : MonoBehaviour
                 {
                     GameObject obj = Instantiate(objectSpawnEnemys[Random.Range(0, objectSpawnEnemys.Length)], spawnPos[Random.Range(0, spawnPos.Length)].position, Quaternion.identity);
                     enemys.Add(obj);
+
+                    // ÀÌÆåÆ®
+                    Instantiate(spawnVFX, obj.transform.position, Quaternion.identity);
                 }
             }
 
@@ -214,14 +227,11 @@ public class Stage_Enemy_Spawner : MonoBehaviour
 
     private void Object_EnemyDestory()
     {
-        Debug.Log("Call A" + enemys.Count);
         if (enemys.Count > 0)
         {
-            Debug.Log("Call B");
             // Object Check
             for (int i = 0; i < enemys.Count; i++)
             {
-                Debug.Log("Call C");
                 if (enemys[i] != null)
                 {
                     enemys[i].GetComponent<Enemy_Base>().Die();
@@ -229,8 +239,6 @@ public class Stage_Enemy_Spawner : MonoBehaviour
                 //enemys[i].GetComponent<Enemy_Base>().TakeDamage(gameObject, 99999, 1, false, Enemy_Base.HitType.None, 1, transform.position); ;
             }
         }
-
-        Debug.Log("Call D");
 
     }
 

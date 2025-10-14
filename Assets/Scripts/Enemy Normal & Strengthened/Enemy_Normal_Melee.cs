@@ -7,7 +7,7 @@ public class Enemy_Normal_Melee : Enemy_Base
 {
     [Header("--- Normal Melee Setting ---")]
     [SerializeField] private float chaseRange;
-    [SerializeField] private float dashPower;
+    [SerializeField] private float dashTime;
     [SerializeField] private bool isWall;
     [SerializeField] private Enemy_GroundCheck groundCheck;
 
@@ -77,30 +77,24 @@ public class Enemy_Normal_Melee : Enemy_Base
 
         if (targetDir < chaseRange)
         {
+            if (hitStopCoroutine != null) StopCoroutine(hitStopCoroutine);
             int ran = Random.Range(0, 100);
-            if(ran <= 65)
-            {
-                hitStopCoroutine = StartCoroutine(NormalAttack());
-            }
-            else
-            {
-                hitStopCoroutine = StartCoroutine(DashAttack());
-            }
+            hitStopCoroutine = StartCoroutine(ran <= 65 ? NormalAttack() : DashAttack());
         }
         else
         {
+            if (hitStopCoroutine != null) StopCoroutine(hitStopCoroutine);
             hitStopCoroutine = StartCoroutine(Chase());
         }
     }
 
     private IEnumerator Chase()
     {
-        Debug.Log("Call chase");
         state = State.Move;
- 
+
         // Chase
         anim.SetFloat("Move", 1);
-        while(targetDir >= chaseRange && groundCheck.isGround && !isWall)
+        while (targetDir >= chaseRange && groundCheck.isGround && !isWall)
         {
             CurTarget_Check();
             LookAt();
@@ -123,7 +117,7 @@ public class Enemy_Normal_Melee : Enemy_Base
         // Animation
         anim.SetTrigger("Attack");
         anim.SetBool("isNormalAttack", true);
-        while(anim.GetBool("isNormalAttack"))
+        while (anim.GetBool("isNormalAttack"))
         {
             yield return null;
         }
@@ -137,10 +131,10 @@ public class Enemy_Normal_Melee : Enemy_Base
 
     public void NormalAttackCollider()
     {
-        normalAttackCollider.SetActive(normalAttackCollider.activeSelf == true ? false : true);
+        normalAttackCollider.SetActive(!normalAttackCollider.activeSelf);
 
         // Attack Sound
-        if(!normalAttackCollider.activeSelf)
+        if (!normalAttackCollider.activeSelf)
         {
             sound.SoundPlay_Other(0);
         }
@@ -160,7 +154,7 @@ public class Enemy_Normal_Melee : Enemy_Base
 
         // Animation Wait
         float timer = 0.5f;
-        while(timer > 0)
+        while (timer > 0)
         {
             LookAt();
             timer -= Time.deltaTime;
@@ -177,13 +171,17 @@ public class Enemy_Normal_Melee : Enemy_Base
         sound.SoundPlay_Other(1);
 
         // Dash
+        dashAttackCollider.SetActive(true);
         timer = 0;
-        while(timer < 1 && !isWall)
+        while (timer < 1 && !isWall)
         {
-            timer += Time.deltaTime * dashPower;
+            timer += Time.deltaTime / dashTime;
             transform.position = Vector3.Lerp(startPos, endPos, EasingFunctions.OutExpo(timer));
             yield return null;
         }
+        transform.position = endPos;
+        dashAttackCollider.SetActive(false);
+
         anim.SetBool("isDashAttack", false);
         rigid.velocity = Vector2.zero;
 
@@ -215,7 +213,7 @@ public class Enemy_Normal_Melee : Enemy_Base
         anim.SetBool("isSpawn", true);
 
         // Animation Wait
-        while(anim.GetBool("isSpawn"))
+        while (anim.GetBool("isSpawn"))
         {
             yield return null;
         }
@@ -224,12 +222,6 @@ public class Enemy_Normal_Melee : Enemy_Base
         yield return new WaitForSeconds(0.25f);
 
         state = State.Idle;
-    }
-
-    public override void Die()
-    {
-        StopAllCoroutines();
-        StartCoroutine(DieCall());
     }
 
     protected override void Stagger()
@@ -244,6 +236,15 @@ public class Enemy_Normal_Melee : Enemy_Base
             anim.SetBool(animationbool[i], false);
         }
         anim.SetFloat("Move", 0);
+    }
+    public override void Die()
+    {
+        if (hitStopCoroutine != null) StopCoroutine(hitStopCoroutine);
+        if (hitAirborneCoroutine != null) StopCoroutine(hitAirborneCoroutine);
+        if (hitKnockbackCoroutine != null) StopCoroutine(hitKnockbackCoroutine);
+        if (hitDownAttackCoroutine != null) StopCoroutine(hitDownAttackCoroutine);
+        StopAllCoroutines();
+        StartCoroutine(DieCall());
     }
 
     private IEnumerator DieCall()
@@ -262,7 +263,7 @@ public class Enemy_Normal_Melee : Enemy_Base
         anim.SetBool("isDie", true);
 
         // Animation Wait
-        while(anim.GetBool("isDie"))
+        while (anim.GetBool("isDie"))
         {
             yield return null;
         }

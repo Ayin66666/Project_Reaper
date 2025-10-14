@@ -1,36 +1,37 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
+
 
 public class Stage_Manager : MonoBehaviour
 {
     [Header("---Start Setting---")]
     [SerializeField] private AudioSource bgmSound;
     [SerializeField] private bool haveStartBGM;
+    [SerializeField] private string startT1;
+    [SerializeField] private string startT2;
     public bool isUI;
 
 
     [Header("---Start UI---")]
     [SerializeField] private GameObject startUI;
     [SerializeField] private Image startBorder;
-    [SerializeField] private Text startMText;
-    [SerializeField] private Text startSText;
+    [SerializeField] private Text startText1;
+    [SerializeField] private Text startText2;
+    [SerializeField] private CanvasGroup startCanvasGroup;
 
 
     [Header("---Room UI---")]
     [SerializeField] private GameObject roomUI;
     [SerializeField] private Image roomBorder;
-    [SerializeField] private Text roomMText;
-    [SerializeField] private Text roomsText;
+    [SerializeField] private CanvasGroup roomCanvasGroup;
 
 
     [Header("---Clear UI---")]
     [SerializeField] private GameObject cleartUI;
     [SerializeField] private Image claerBorder;
-    [SerializeField] private Text claerMText;
-    [SerializeField] private Text claerSText;
+    [SerializeField] private CanvasGroup clearCanvasGroup;
 
 
     [Header("---Next Scene Move Setting---")]
@@ -60,7 +61,7 @@ public class Stage_Manager : MonoBehaviour
         curTimer = waitTime;
 
         // BGM Play
-        if(haveStartBGM)
+        if (haveStartBGM)
         {
             bgmSound.Play();
         }
@@ -78,42 +79,32 @@ public class Stage_Manager : MonoBehaviour
     {
         isUI = true;
         startUI.SetActive(true);
+        startText1.text = startT1;
+        startText2.text = startT2;
 
-        // UI On => Border &  MainText
+        // UI On => Border &  MainText & SubText
         float a = 0;
-        while(a < 1)
+        while (a < 1)
         {
-            a += Time.deltaTime;
-            startBorder.color =new Color(startBorder.color.r, startBorder.color.g, startBorder.color.b, a);
-            startMText.color =new Color(startMText.color.r, startMText.color.g, startMText.color.b, a);
+            a += Time.deltaTime / 1f;
+            startCanvasGroup.alpha = a;
             yield return null;
         }
+        a = 1;
+        startCanvasGroup.alpha = a;
 
         // Delay
         yield return new WaitForSeconds(0.5f);
 
-        // UI On = SubText
-        a = 0;
-        while(a < 1)
-        {
-            a += Time.deltaTime;
-            startSText.color = new Color(startSText.color.r, startSText.color.g, startSText.color.b, a);
-            yield return null;
-        }
-
-        // Delay
-        yield return new WaitForSeconds(0.75f);
-
-        a = 1;
+        // UI Off
         while (a > 0)
         {
-            a -= Time.deltaTime * 0.75f;
-            startBorder.color = new Color(startBorder.color.r, startBorder.color.g, startBorder.color.b, a);
-            startMText.color = new Color(startMText.color.r, startMText.color.g, startMText.color.b, a);
-            startSText.color = new Color(startSText.color.r, startSText.color.g, startSText.color.b, a);
+            a -= Time.deltaTime / 1.25f;
+            startCanvasGroup.alpha = a;
             yield return null;
         }
 
+        startCanvasGroup.alpha = 0;
         startUI.SetActive(false);
         isUI = false;
     }
@@ -129,28 +120,29 @@ public class Stage_Manager : MonoBehaviour
         roomUI.SetActive(true);
 
         // UI On
+        roomCanvasGroup.alpha = 0;
         float a = 0;
         while (a < 1)
         {
-            a += Time.deltaTime * 0.75f;
-            roomMText.color = new Color(roomMText.color.r, roomMText.color.g, roomMText.color.b, a);
-            roomsText.color = new Color(roomsText.color.r, roomsText.color.g, roomsText.color.b, a);
+            a += Time.deltaTime / 1.25f;
+            roomCanvasGroup.alpha = a;
             yield return null;
         }
+        a = 1;
+        roomCanvasGroup.alpha = a;
 
         // Delay
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.35f);
 
         // UI Off
-        a = 1;
         while (a > 0)
         {
             a -= Time.deltaTime;
-            roomMText.color = new Color(roomMText.color.r, roomMText.color.g, roomMText.color.b, a);
-            roomsText.color = new Color(roomsText.color.r, roomsText.color.g, roomsText.color.b, a);
+            roomCanvasGroup.alpha = a;
             yield return null;
         }
 
+        roomCanvasGroup.alpha = 0;
         roomUI.SetActive(false);
         isUI = false;
     }
@@ -167,39 +159,27 @@ public class Stage_Manager : MonoBehaviour
 
         // UI on => Border &  MainText
         float a = 0;
-        while(a < 1)
+        while (a < 1)
         {
-            a += Time.deltaTime;
-            claerBorder.color = new Color(claerBorder.color.r, claerBorder.color.g, claerBorder.color.b, a);
-            claerMText.color = new Color(claerMText.color.r, claerMText.color.g, claerMText.color.b, a);
+            a += Time.deltaTime / 1f;
+            clearCanvasGroup.alpha = a;
             yield return null;
         }
+        a = 1;
+        clearCanvasGroup.alpha = a;
 
         // Delay
-        yield return new WaitForSeconds(0.25f);
-
-        // UI On = SubText
-        a = 0;
-        while(a < 1)
-        {
-            a += Time.deltaTime;
-            claerSText.color = new Color(claerSText.color.r, claerSText.color.g, claerSText.color.b, a);
-            yield return null;
-        }
-
-        // Delay
-        yield return new WaitForSeconds(0.25f);
+        yield return new WaitForSeconds(0.35f);
 
         a = 1;
         while (a > 0)
         {
-            a -= Time.deltaTime;
-            claerBorder.color = new Color(claerBorder.color.r, claerBorder.color.g, claerBorder.color.b, a);
-            claerMText.color = new Color(claerMText.color.r, claerMText.color.g, claerMText.color.b, a);
-            claerSText.color = new Color(claerSText.color.r, claerSText.color.g, claerSText.color.b, a);
+            a -= Time.deltaTime / 1f;
+            clearCanvasGroup.alpha = a;
             yield return null;
         }
 
+        clearCanvasGroup.alpha = 0;
         cleartUI.SetActive(false);
         isUI = false;
     }
@@ -222,7 +202,7 @@ public class Stage_Manager : MonoBehaviour
         // Next Stage Move
         if (curTimer <= 0)
         {
-            if(isLastStage)
+            if (isLastStage)
             {
                 Scene_Loading_Manager.LoadScene(nextScene);
             }
@@ -247,7 +227,7 @@ public class Stage_Manager : MonoBehaviour
                 playerList.Add(collision.gameObject);
                 if (playerList.Count == playerCount)
                 {
-                    if(isLastStage)
+                    if (isLastStage)
                     {
                         Scene_Loading_Manager.LoadScene(nextScene);
                     }

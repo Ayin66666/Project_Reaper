@@ -1093,12 +1093,14 @@ public class Enemy_Boss_Stage2 : Enemy_Base
             yield return null;
         }
 
+        /*
         // UI Call
         stage_Manager.Stage_Clear();
         while (stage_Manager.isUI)
         {
             yield return null;
         }
+        */
 
         // Delay
         yield return new WaitForSeconds(0.25f);

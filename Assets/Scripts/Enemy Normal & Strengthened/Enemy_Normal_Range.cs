@@ -56,12 +56,6 @@ public class Enemy_Normal_Range : Enemy_Base
         // LR Wall Check
         WallCheck();
 
-        // Test
-        if (Input.GetKeyDown(KeyCode.K))
-        {
-            // StartCoroutine(DashAttack());
-        }
-
         // Think
         if (state == State.Idle && !isAttack && !isDie)
         {
@@ -84,31 +78,13 @@ public class Enemy_Normal_Range : Enemy_Base
         if (targetDir < chaseRange)
         {
             // Attack Setting
-            int ran = Random.Range(0, 100);
-            if(targetDir <= 1.5f)
-            {
-                // Melee Attack
-                hitStopCoroutine = StartCoroutine(DashAttack());
-            }
-            else
-            {
-                hitStopCoroutine = StartCoroutine(NormalShot());
-                /*
-                // Ranage Attack
-                if (ran <= 50)
-                {
-
-                }
-                else
-                {
-                    hitStopCoroutine = StartCoroutine(HowitzerShot());
-                }
-                */
-            }
+            if (hitStopCoroutine != null) StopCoroutine(hitStopCoroutine);
+            hitStopCoroutine = StartCoroutine(targetDir <= 1.5f ? DashAttack() : NormalShot());
         }
         else
         {
             // Ground Check + wall Check
+            if (hitStopCoroutine != null) StopCoroutine(hitStopCoroutine);
             hitStopCoroutine = StartCoroutine(Chase());
         }
     }
@@ -192,7 +168,7 @@ public class Enemy_Normal_Range : Enemy_Base
 
         // Move Effect + Wait
         dashAttackEffect.SetActive(true);
-        while(dashAttackEffect.activeSelf)
+        while (dashAttackEffect.activeSelf)
         {
             yield return null;
         }
@@ -241,7 +217,7 @@ public class Enemy_Normal_Range : Enemy_Base
         obj.GetComponent<Enemy_Bullet>().Bullet_Setting(Enemy_Bullet.BulletType.None, shotDir, bulletSpeed, bulletSpeed * 2f, 15f);
 
         // Animation Wait
-        while(anim.GetBool("isNormalShot"))
+        while (anim.GetBool("isNormalShot"))
         {
             yield return null;
         }
@@ -265,7 +241,7 @@ public class Enemy_Normal_Range : Enemy_Base
         anim.SetBool("isShotReady", true);
         anim.SetBool("isHowitzerShot", true);
         float timer = 0;
-        while(timer < 0.5f)
+        while (timer < 0.5f)
         {
             LookAt();
             timer += Time.deltaTime;
@@ -316,7 +292,7 @@ public class Enemy_Normal_Range : Enemy_Base
         // Animation
         anim.SetTrigger("Spawn");
         anim.SetBool("isSpawn", true);
-        while(anim.GetBool("isSpawn"))
+        while (anim.GetBool("isSpawn"))
         {
             yield return null;
         }
@@ -346,6 +322,11 @@ public class Enemy_Normal_Range : Enemy_Base
 
     public override void Die()
     {
+        if (hitStopCoroutine != null) StopCoroutine(hitStopCoroutine);
+        if (hitAirborneCoroutine != null) StopCoroutine(hitAirborneCoroutine);
+        if (hitKnockbackCoroutine != null) StopCoroutine(hitKnockbackCoroutine);
+        if (hitDownAttackCoroutine != null) StopCoroutine(hitDownAttackCoroutine);
+
         StopAllCoroutines();
         StartCoroutine(DieCall());
     }
@@ -354,6 +335,7 @@ public class Enemy_Normal_Range : Enemy_Base
     {
         state = State.Die;
         isDie = true;
+        line.enabled = false;
 
         // UI ÃÊ±âÈ­
         statusUI_Normal.Die();

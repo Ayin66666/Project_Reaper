@@ -1,7 +1,7 @@
+using Easing;
 using System.Collections;
 using UnityEngine;
-using Easing;
-using UnityEditor;
+
 
 public class Enemy_Boss_Stage1 : Enemy_Base
 {
@@ -53,20 +53,15 @@ public class Enemy_Boss_Stage1 : Enemy_Base
     private void Update()
     {
         // Spawn & Die Check
-        if(state == State.Spawn || state == State.Die)
+        if (state == State.Spawn || state == State.Die)
         {
             return;
-        }
-
-        if (Input.GetKeyDown(KeyCode.V))
-        {
-            StartCoroutine(TeleportSlash());
         }
 
         GroundCheck();
 
         // Find Target & Reset Enemy
-        if(!haveTarget)
+        if (!haveTarget)
         {
             Target_Setting();
             if (!haveTarget && state != State.Await)
@@ -96,30 +91,24 @@ public class Enemy_Boss_Stage1 : Enemy_Base
         if (curTarget != null)
         {
             CurTarget_Check();
-            if(attackCount >= 5)
+            if (hitStopCoroutine != null) StopCoroutine(hitStopCoroutine);
+            if (attackCount >= 5)
             {
-                StartCoroutine(BulletHellSlash());
+                // 필살기
+                hitStopCoroutine = StartCoroutine(BulletHellSlash());
+                return;
+            }
+
+            if (targetDir <= 5)
+            {
+                // 근거리 공격
+                hitStopCoroutine = StartCoroutine(RollingSlash());
             }
             else
             {
-                if (targetDir <= 5)
-                {
-                    // 근거리 공격
-                    StartCoroutine(RollingSlash());
-                }
-                else
-                {
-                    // 원거리 공격
-                    int ran = Random.Range(0, 100);
-                    if (ran <= 50)
-                    {
-                        StartCoroutine(TeleportSlash());
-                    }
-                    else
-                    {
-                        StartCoroutine(RollingSlash());
-                    }
-                }
+                // 원거리 공격
+                int ran = Random.Range(0, 100);
+                hitStopCoroutine = StartCoroutine(ran <= 50 ? TeleportSlash() : RollingSlash());
             }
         }
     }
@@ -144,6 +133,12 @@ public class Enemy_Boss_Stage1 : Enemy_Base
         Vector2 startPos = transform.position;
         Vector2 endPos = curTarget.transform.position;
         endPos.y = transform.position.y;
+
+        // 벽 체크
+        Vector2 moveDir = endPos - startPos;
+        RaycastHit2D hit = Physics2D.Raycast(startPos, moveDir.normalized, moveDir.magnitude, groundLayer);
+        if (hit.collider != null) endPos = hit.point + hit.normal * 0.5f;
+
         float timer = 0;
         while (timer < 1)
         {
@@ -201,7 +196,7 @@ public class Enemy_Boss_Stage1 : Enemy_Base
         }
 
         int ran = Random.Range(0, 100);
-        if(ran <= 40)
+        if (ran <= 40)
         {
             StartCoroutine(BackstepAirSlash());
         }
@@ -275,17 +270,23 @@ public class Enemy_Boss_Stage1 : Enemy_Base
         // 이동
         Vector2 startPos = transform.position;
         Vector2 endPos = backDashPos.position;
+
+        // 벽 체크
+        Vector2 moveDir = endPos - startPos;
+        RaycastHit2D hit = Physics2D.Raycast(startPos, moveDir.normalized, moveDir.magnitude, groundLayer);
+        if (hit.collider != null) endPos = hit.point + hit.normal * 0.5f;
+
         float timer = 0;
         while (timer < 1)
         {
-            timer += 4f * Time.deltaTime;
+            timer += Time.deltaTime / 0.35f;
             transform.position = Vector2.Lerp(startPos, endPos, EasingFunctions.InOutQuart(timer));
             yield return null;
         }
         anim.SetBool("isBackstep", false);
 
         // 대기
-        while(anim.GetBool("isBackstepAirSlash"))
+        while (anim.GetBool("isBackstepAirSlash"))
         {
             yield return null;
         }
@@ -295,7 +296,7 @@ public class Enemy_Boss_Stage1 : Enemy_Base
         curAttack = CurAttack.BackstepAirSlash;
         state = State.Idle;
         isAttack = false;
-    } // End
+    } // End 1
 
     public void BackstepAirSlashCollider()
     {
@@ -319,7 +320,7 @@ public class Enemy_Boss_Stage1 : Enemy_Base
 
         anim.SetTrigger("Attack");
         anim.SetBool("isTeleport", true);
-        anim.SetBool("isTeleportSlash",true);
+        anim.SetBool("isTeleportSlash", true);
         anim.SetBool("isTeleprotDelay", true);
 
         // Sound
@@ -339,7 +340,7 @@ public class Enemy_Boss_Stage1 : Enemy_Base
         CurTarget_Check();
         if (targetDir > 0)
         {
-            transform.position = new Vector3(curTarget.transform.position.x -3f, transform.position.y, curTarget.transform.position.z);
+            transform.position = new Vector3(curTarget.transform.position.x - 3f, transform.position.y, curTarget.transform.position.z);
         }
         else
         {
@@ -362,7 +363,7 @@ public class Enemy_Boss_Stage1 : Enemy_Base
         yield return new WaitForSeconds(Random.Range(0.15f, 0.25f));
 
         // Attack
-        while(anim.GetBool("isTeleportSlash"))
+        while (anim.GetBool("isTeleportSlash"))
         {
             yield return null;
         }
@@ -445,7 +446,7 @@ public class Enemy_Boss_Stage1 : Enemy_Base
 
         // 공격
         StartCoroutine(BulletHellSlashSpawnCall());
-        while(anim.GetBool("isBulletHellSlash"))
+        while (anim.GetBool("isBulletHellSlash"))
         {
             yield return null;
         }
@@ -475,7 +476,7 @@ public class Enemy_Boss_Stage1 : Enemy_Base
             }
 
             // Big Wave Attack 
-            if (i%3 == 0)
+            if (i % 3 == 0)
             {
                 ran = Random.Range(0, 2);
                 switch (ran)
@@ -501,21 +502,14 @@ public class Enemy_Boss_Stage1 : Enemy_Base
 
     private void BulletSpawnRL(int count, bool isLeft, bool isWhite)
     {
-        if(isLeft)
+        /*
+        if (isLeft)
         {
             // Left Spawn
             for (int i = 0; i < count; i++)
             {
-                if(isWhite)
-                {
-                    GameObject obj = Instantiate(waveBullet[0], shotPos.position, Quaternion.identity);
-                    obj.GetComponent<Enemy_Bullet>().Bullet_Setting(Enemy_Bullet.BulletType.Red, -shotPos.right, 10, 25, 15);
-                }
-                else
-                {
-                    GameObject obj = Instantiate(waveBullet[1], shotPos.position, Quaternion.identity);
-                    obj.GetComponent<Enemy_Bullet>().Bullet_Setting(Enemy_Bullet.BulletType.Red, -shotPos.right, 10, 25, 15);
-                }
+                GameObject obj = Instantiate(waveBullet[isWhite ? 0 : 1], shotPos.position, Quaternion.identity);
+                obj.GetComponent<Enemy_Bullet>().Bullet_Setting(Enemy_Bullet.BulletType.Red, -shotPos.right, 10, 25, 15);
             }
         }
         else
@@ -523,17 +517,16 @@ public class Enemy_Boss_Stage1 : Enemy_Base
             // Right Spawn
             for (int i = 0; i < count; i++)
             {
-                if (isWhite)
-                {
-                    GameObject obj = Instantiate(waveBullet[0], shotPos.position, Quaternion.identity);
-                    obj.GetComponent<Enemy_Bullet>().Bullet_Setting(Enemy_Bullet.BulletType.Blue, shotPos.right, 10, 25, 15);
-                }
-                else
-                {
-                    GameObject obj = Instantiate(waveBullet[1], shotPos.position, Quaternion.identity);
-                    obj.GetComponent<Enemy_Bullet>().Bullet_Setting(Enemy_Bullet.BulletType.Blue, shotPos.right, 10, 25, 15);
-                }
+                GameObject obj = Instantiate(waveBullet[isWhite ? 0 : 1], shotPos.position, Quaternion.identity);
+                obj.GetComponent<Enemy_Bullet>().Bullet_Setting(Enemy_Bullet.BulletType.Blue, shotPos.right, 10, 25, 15);
             }
+        }
+        */
+        for (int i = 0; i < count; i++)
+        {
+            Vector2 dir = isLeft ? -shotPos.right : shotPos.right;
+            GameObject obj = Instantiate(waveBullet[isWhite ? 0 : 1], shotPos.position, Quaternion.LookRotation(Vector3.forward, dir));
+            obj.GetComponent<Enemy_Bullet>().Bullet_Setting(isLeft ? Enemy_Bullet.BulletType.Red : Enemy_Bullet.BulletType.Blue, dir, 10, 25, 15);
         }
     }
 
@@ -548,12 +541,12 @@ public class Enemy_Boss_Stage1 : Enemy_Base
         {
             float bulletX = startPos.position.x + Mathf.Sin((anlge * Mathf.PI) / 180) * radius;
             float bulletY = startPos.position.y + Mathf.Cos((anlge * Mathf.PI) / 180) * radius;
-            
+
             Vector3 projectVec = new Vector3(bulletX, bulletY, 0);
             Vector3 projectDir = (projectVec - startPos.position).normalized;
 
             // Bullet Spawn
-            if(isWhite)
+            if (isWhite)
             {
                 GameObject obj = Instantiate(bullet[0], shotPos.position, Quaternion.identity);
                 obj.GetComponent<Enemy_Bullet>().Bullet_Setting(Enemy_Bullet.BulletType.Red, projectDir, 5, 30, 10);
@@ -590,7 +583,7 @@ public class Enemy_Boss_Stage1 : Enemy_Base
         for (int i = 0; i < attackPos.Length; i++)
         {
             GameObject obj = Instantiate(attackObj, shotPos.position, Quaternion.identity);
-            if(ran == 0)
+            if (ran == 0)
             {
                 obj.GetComponent<Enemy_Bullet>().Bullet_Setting(Enemy_Bullet.BulletType.Red, (exPos[i].position - transform.position).normalized, 15, 50, 15f);
 
@@ -631,7 +624,7 @@ public class Enemy_Boss_Stage1 : Enemy_Base
         }
 
         // UI Wait
-        while(statusUI_Boss.isFade)
+        while (statusUI_Boss.isFade)
         {
             yield return null;
         }
@@ -663,32 +656,34 @@ public class Enemy_Boss_Stage1 : Enemy_Base
         // Collider Off
         rollingSlashCollider.SetActive(false);
         backstepAirSlashCollider.SetActive(false);
-        for (int i = 0; i < comboAttackCollider.Length; i++)
+        foreach (GameObject obj in comboAttackCollider)
         {
-            comboAttackCollider[i].SetActive(false);
+            obj.SetActive(false);
         }
-        for (int i = 0; i < teleportSlashCollider.Length; i++)
+        foreach (GameObject obj in teleportSlashCollider)
         {
-            teleportSlashCollider[i].SetActive(false);
+            obj.SetActive(false);
         }
 
         // Animation
         anim.SetTrigger("Die");
         anim.SetBool("isDie", true);
-        while(anim.GetBool("isDie"))
+        while (anim.GetBool("isDie"))
         {
             yield return null;
         }
 
+        /*
         // UI Call
         stage_Manager.Stage_Clear();
         while(stage_Manager.isUI)
         {
             yield return null;
         }
+        */
 
         // Delay
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(0.5f);
 
         // Destroy
         Destroy(container);
