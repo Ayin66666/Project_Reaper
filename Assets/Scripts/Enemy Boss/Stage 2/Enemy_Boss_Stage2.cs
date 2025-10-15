@@ -99,11 +99,6 @@ public class Enemy_Boss_Stage2 : Enemy_Base
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.V))
-        {
-             StartCoroutine(DieCall());
-        }
-
         WallCheck();
         GroundCheck();
 
@@ -882,20 +877,15 @@ public class Enemy_Boss_Stage2 : Enemy_Base
         Vector3 startPos = transform.position;
         Vector3 endPos = backstepPos.position;
 
-        // Wall Check
-        Vector3 rayPos = (groundRushPos.position - transform.position).normalized;
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, rayPos, 10f, groundLayer);
-        bool isHit = hit;
-        if (isHit)
-        {
-            endPos = hit.point;
-        }
+        Vector3 rayDir = (groundRushPos.position - transform.position).normalized;
+        RaycastHit2D hit = Physics2D.Raycast(startPos, rayDir, (groundRushPos.position - transform.position).magnitude, groundLayer);
+        if (hit.collider != null) endPos = hit.point + hit.normal * 0.5f;
 
         // Move
         float timer = 0;
         while(timer < 1)
         {
-            timer += Time.deltaTime * 3f;
+            timer += Time.deltaTime / 1.5f;
             transform.position = Vector3.Lerp(startPos, endPos, EasingFunctions.OutExpo(timer));
             yield return null;
         }

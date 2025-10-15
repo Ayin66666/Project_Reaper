@@ -525,7 +525,8 @@ public class Enemy_Boss_Stage1 : Enemy_Base
         for (int i = 0; i < count; i++)
         {
             Vector2 dir = isLeft ? -shotPos.right : shotPos.right;
-            GameObject obj = Instantiate(waveBullet[isWhite ? 0 : 1], shotPos.position, Quaternion.LookRotation(Vector3.forward, dir));
+            GameObject obj = Instantiate(waveBullet[isWhite ? 0 : 1], shotPos.position, Quaternion.identity);
+            obj.transform.localScale = new Vector3(obj.transform.localScale.x * (isLeft ? -1 : 1), obj.transform.localScale.y, 1);
             obj.GetComponent<Enemy_Bullet>().Bullet_Setting(isLeft ? Enemy_Bullet.BulletType.Red : Enemy_Bullet.BulletType.Blue, dir, 10, 25, 15);
         }
     }

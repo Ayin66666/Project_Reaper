@@ -1,6 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+
 
 public class Enemy_AttackCollider : MonoBehaviour
 {
@@ -14,6 +13,7 @@ public class Enemy_AttackCollider : MonoBehaviour
     private float criticalChance;
     private float criticalMultiplier;
 
+
     private void Awake()
     {
         damage = enemy.damage;
@@ -23,6 +23,7 @@ public class Enemy_AttackCollider : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        /* ±¸¹öÀü
         if(collision.CompareTag("Player"))
         {
             // Critical Cal
@@ -59,6 +60,28 @@ public class Enemy_AttackCollider : MonoBehaviour
                         collision.GetComponent<Player_Status>().TakeDamage(damage, 1, false, Player_Status.HitColor.Blue, (isStagger ? Player_Status.HitType.Stagger : Player_Status.HitType.None));
                         break;
                 }
+            }
+        }
+        */
+
+        if(collision.CompareTag("Player"))
+        {
+            int ran = Random.Range(0, 100);
+            bool isCri = ran <= criticalChance;
+            float criVal = ran <= criticalChance ? criticalMultiplier : 1;
+
+            damage = (int)(damage * motionVelue * criVal);
+            switch (attackColor)
+            {
+                case AttackColor.None:
+                    collision.GetComponent<Player_Status>().TakeDamage(damage, 1, isCri, Player_Status.HitColor.None, (isStagger ? Player_Status.HitType.Stagger : Player_Status.HitType.None));
+                    break;
+                case AttackColor.Red:
+                    collision.GetComponent<Player_Status>().TakeDamage(damage, 1, isCri, Player_Status.HitColor.Red, (isStagger ? Player_Status.HitType.Stagger : Player_Status.HitType.None));
+                    break;
+                case AttackColor.Blue:
+                    collision.GetComponent<Player_Status>().TakeDamage(damage, 1, isCri, Player_Status.HitColor.Blue, (isStagger ? Player_Status.HitType.Stagger : Player_Status.HitType.None));
+                    break;
             }
         }
     }

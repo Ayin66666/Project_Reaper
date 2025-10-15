@@ -36,9 +36,11 @@ public class Enemy_Boss_StatusUI : MonoBehaviour
     private void StatusUI_Setting()
     {
         hpBarF.maxValue = enemy.hp;
+        hpBarF.value = enemy.hp;
         hpBarF.minValue = 0;
 
         hpBarB.maxValue = enemy.hp;
+        hpBarB.value = enemy.hp;
         hpBarB.minValue = 0;
 
         nameText.text = enemy.enemyName;
