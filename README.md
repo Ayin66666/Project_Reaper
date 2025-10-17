@@ -24,6 +24,3 @@
 
 ## 플레이 영상
 - https://www.youtube.com/watch?v=_vOCEsqXSqk
-
-## 기술 문서
-- 
