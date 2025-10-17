@@ -167,7 +167,7 @@ public abstract class Enemy_Base : MonoBehaviour
         }
     }
 
-    protected void LookAt()
+    public void LookAt()
     {
         if(haveTarget)
         {

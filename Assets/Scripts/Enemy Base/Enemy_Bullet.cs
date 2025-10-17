@@ -8,7 +8,6 @@ public class Enemy_Bullet : MonoBehaviour
     [Header("---Componemt---")]
     [SerializeField] private Rigidbody2D rigid;
     [SerializeField] private Collider2D bulletCollider;
-    [SerializeField] private GameObject hitEffect;
 
     [Header("---Status---")]
     [SerializeField] private int damage;
@@ -55,17 +54,9 @@ public class Enemy_Bullet : MonoBehaviour
 
     private void HitEffect()
     {
-        if(hitCoroutine != null)
-        {
-            StopCoroutine(hitCoroutine);
-        }
-
+        if(hitCoroutine != null) StopCoroutine(hitCoroutine);
         rigid.velocity = Vector2.zero;
         bulletCollider.enabled = false;
-
-        // Hit Efftect
-        hitEffect.transform.parent = null;
-        hitEffect.SetActive(true);
 
         // Destory Bullet
         Destroy(gameObject);
@@ -80,7 +71,7 @@ public class Enemy_Bullet : MonoBehaviour
                 if (collision.CompareTag("Player") && collision.GetComponent<Player_Status>().myColor == Player_Status.Mycolor.Red)
                 {
                     collision.GetComponent<Player_Status>().TakeDamage(damage, 1, false, Player_Status.HitColor.Blue, Player_Status.HitType.None);
-                    HitEffect();
+                    if(bullet == Bullet.Bullet) HitEffect();
                 }
                 break;
 
@@ -88,7 +79,7 @@ public class Enemy_Bullet : MonoBehaviour
                 if (collision.CompareTag("Player") && collision.GetComponent<Player_Status>().myColor == Player_Status.Mycolor.Blue)
                 {
                     collision.GetComponent<Player_Status>().TakeDamage(damage, 1, false, Player_Status.HitColor.Red, Player_Status.HitType.None);
-                    HitEffect();
+                    if (bullet == Bullet.Bullet) HitEffect();
                 }
                 break;
 
@@ -96,7 +87,7 @@ public class Enemy_Bullet : MonoBehaviour
                 if (collision.CompareTag("Player"))
                 {
                     collision.GetComponent<Player_Status>().TakeDamage(damage, 1, false, Player_Status.HitColor.None, Player_Status.HitType.None);
-                    HitEffect();
+                    if (bullet == Bullet.Bullet) HitEffect();
                 }
                 break;
         }

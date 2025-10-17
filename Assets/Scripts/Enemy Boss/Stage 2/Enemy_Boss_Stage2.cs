@@ -93,6 +93,15 @@ public class Enemy_Boss_Stage2 : Enemy_Base
 
     private void Update()
     {
+        if(Input.GetKeyDown(KeyCode.J))
+        {
+            StartCoroutine(BackstepSlash());
+        }
+
+        Vector3 rayDir = (backstepPos.position - transform.position).normalized;
+        Vector3 rayStart = new Vector3(transform.position.x, transform.position.y, transform.position.z);
+        Debug.DrawRay(rayStart, rayDir, Color.red, (backstepPos.position - transform.position).magnitude);
+        
         // Spawn & Die Check
         if (state == State.Spawn || state == State.Die)
         {
@@ -464,11 +473,11 @@ public class Enemy_Boss_Stage2 : Enemy_Base
                 hitStopCoroutine = StartCoroutine(CountSlash());
                 yield break;
             }
-            Debug.Log(timer);
+
             timer -= Time.deltaTime;
             yield return null;
         }
-        Debug.Log(timer);
+
         anim.SetBool("isCountWait", false);
 
         // None Hit Attack
@@ -620,6 +629,9 @@ public class Enemy_Boss_Stage2 : Enemy_Base
         // Move Pos Setting
         Vector3 startPos = transform.position;
         Vector3 endPos = groundRushPos.position;
+        Vector3 rayDir = (groundRushPos.position - transform.position).normalized;
+        RaycastHit2D hit = Physics2D.Raycast(startPos, rayDir, (groundRushPos.position - transform.position).magnitude, groundLayer);
+        if (hit.collider != null) endPos = hit.point + hit.normal * 1f;
 
         // Move
         groundRushCollider.SetActive(true);
@@ -835,7 +847,7 @@ public class Enemy_Boss_Stage2 : Enemy_Base
     {
         Vector2 shotDir = (countSwordAuraShotDir[1].position - transform.position).normalized;
         GameObject obj = Instantiate(countSwordAura, transform.position, Quaternion.identity);
-        obj.GetComponent<Enemy_Bullet>().Bullet_Setting(Enemy_Bullet.BulletType.Red, shotDir, 15, 30, 15);
+        obj.GetComponent<Enemy_Bullet>().Bullet_Setting(Enemy_Bullet.BulletType.None, shotDir, 15, 30, 15);
     }
 
     public void ComboMoveCall()
@@ -852,6 +864,10 @@ public class Enemy_Boss_Stage2 : Enemy_Base
         // Move
         Vector2 startPos = transform.position;
         Vector2 endPos = comboMovePos.position;
+        Vector3 rayDir = (comboMovePos.position - transform.position).normalized;
+        RaycastHit2D hit = Physics2D.Raycast(startPos, rayDir, (comboMovePos.position - transform.position).magnitude, groundLayer);
+        if (hit.collider != null) endPos = hit.point + hit.normal * 1f;
+
         float timer = 0;
         while (timer < 1 && state == State.Attack && !isWall)
         {
@@ -859,6 +875,8 @@ public class Enemy_Boss_Stage2 : Enemy_Base
             transform.position = Vector2.Lerp(startPos, endPos, EasingFunctions.OutExpo(timer));
             yield return null;
         }
+        transform.position = endPos;
+
     } // End
 
     private IEnumerator BackstepSlash()
@@ -877,20 +895,21 @@ public class Enemy_Boss_Stage2 : Enemy_Base
         Vector3 startPos = transform.position;
         Vector3 endPos = backstepPos.position;
 
-        Vector3 rayDir = (groundRushPos.position - transform.position).normalized;
-        RaycastHit2D hit = Physics2D.Raycast(startPos, rayDir, (groundRushPos.position - transform.position).magnitude, groundLayer);
+        Vector3 rayDir = (backstepPos.position - transform.position).normalized;
+        RaycastHit2D hit = Physics2D.Raycast(startPos, rayDir, (backstepPos.position - transform.position).magnitude, groundLayer);
         if (hit.collider != null) endPos = hit.point + hit.normal * 0.5f;
 
         // Move
         float timer = 0;
         while(timer < 1)
         {
-            timer += Time.deltaTime / 1.5f;
+            timer += Time.deltaTime / 1f;
             transform.position = Vector3.Lerp(startPos, endPos, EasingFunctions.OutExpo(timer));
             yield return null;
         }
-        anim.SetBool("isBackstep", false);
+        transform.position = endPos;
 
+        anim.SetBool("isBackstep", false);
         while(anim.GetBool("isBackstepSlash"))
         {
             yield return null;
