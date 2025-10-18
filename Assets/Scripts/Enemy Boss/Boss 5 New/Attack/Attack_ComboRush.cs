@@ -35,7 +35,7 @@ public class Attack_ComboRush : Attack_Base
 
         // 페이드 인
         Enemy_Boss5_New boss = body.GetComponent<Enemy_Boss5_New>();
-        boss.Fade(true);
+        boss.Body_Setting(true);
 
         // 딜레이
         yield return new WaitForSeconds(0.5f);
@@ -44,7 +44,7 @@ public class Attack_ComboRush : Attack_Base
         for (int i = 0; i < 3; i++)
         {
             // 페이드 아웃
-            boss.Fade(false);
+            boss.Body_Setting(false);
 
             // 애니
             anim.SetTrigger("Action");
@@ -71,19 +71,19 @@ public class Attack_ComboRush : Attack_Base
             // 딜레이
             if (i <= 2)
             {
-                boss.Fade(true);
+                boss.Body_Setting(true);
                 yield return new WaitForSeconds(0.35f);
             }
         }
 
-        boss.Fade(false);
+        boss.Body_Setting(false);
         isUsed = false;
     }
 
     public override void Reset()
     {
         if (useCoroutine != null) StopCoroutine(useCoroutine);
-        body.GetComponent<Enemy_Boss5_New>().Fade(false);
+        body.GetComponent<Enemy_Boss5_New>().Body_Setting(false);
         attackCollider.SetActive(false);
     }
 }

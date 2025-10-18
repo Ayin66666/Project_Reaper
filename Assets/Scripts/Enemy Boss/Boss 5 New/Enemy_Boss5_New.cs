@@ -37,7 +37,7 @@ public class Enemy_Boss5_New : Enemy_Base
     /// 바디 활성화 & 비활성화
     /// </summary>
     /// <param name="isOn"></param>
-    public void Fade(bool isOn)
+    public void Body_Setting(bool isOn)
     {
 
     }

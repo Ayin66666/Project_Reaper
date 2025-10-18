@@ -66,7 +66,7 @@ public abstract class Enemy_Base : MonoBehaviour
 
 
     [Header("---Target---")]
-    [SerializeField] protected GameObject curTarget;
+    public GameObject curTarget;
     protected Vector2 targetVector;
     protected float targetDir;
     protected List<GameObject> targetList = new List<GameObject>();
