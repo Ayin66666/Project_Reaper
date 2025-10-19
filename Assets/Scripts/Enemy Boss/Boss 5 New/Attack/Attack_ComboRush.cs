@@ -1,14 +1,18 @@
 using System.Collections;
 using UnityEngine;
 using Easing;
+using System.Collections.Generic;
 
 
 public class Attack_ComboRush : Attack_Base
 {
     [Header("---Attack Setting---")]
-    [SerializeField] private float moveSpeed;
-    [SerializeField] private GameObject attackCollider;
+    [SerializeField] private float[] moveSpeed;
+    [SerializeField] private GameObject chargeVFX;
+    [SerializeField] private GameObject chargeVFX2;
+    [SerializeField] private GameObject[] attackCollider;
     [SerializeField] private Transform[] movePos;
+    [SerializeField] private Enemy_Boss5_New boss;
 
 
     [Header("---Slash VFX---")]
@@ -22,68 +26,102 @@ public class Attack_ComboRush : Attack_Base
         useCoroutine = StartCoroutine(UseCall());
     }
 
-    /*
-    페이드
-    좌 우 - 검기 
-    우 좌 - 검기
-    좌 우 - 검기
-    */
 
+    // 차징 - 페이드 - 등장 - 2연베기 - 강돌진
     private IEnumerator UseCall()
     {
         isUsed = true;
 
-        // 페이드 인
-        Enemy_Boss5_New boss = body.GetComponent<Enemy_Boss5_New>();
-        boss.Body_Setting(true);
+        anim.SetTrigger("Action");
+        anim.SetFloat("AnimValue", 0);
+        anim.SetBool("isComboRushCharge", true);
+        anim.SetBool("isComboRush", true);
 
-        // 딜레이
+        chargeVFX.SetActive(true);
+        chargeVFX2.SetActive(true);
         yield return new WaitForSeconds(0.5f);
+        anim.SetBool("isComboRushCharge", false);
 
-        // 3연 베기
-        for (int i = 0; i < 3; i++)
+        // 고속베기 x2
+        Vector3 startPos;
+        Vector3 endPos;
+        float timer;
+        List<Vector3> pos = new List<Vector3> { movePos[0].position, movePos[1].position };
+        for (int i = 0; i < pos.Count; i++)
         {
-            // 페이드 아웃
-            boss.Body_Setting(false);
-
-            // 애니
             anim.SetTrigger("Action");
-            anim.SetBool("ComboRush", true);
+            anim.SetFloat("AnimValue", 0);
 
-            // 이동 설정
-            Vector3 startPos = movePos[i % 2 == 0 ? 0 : 1].position;
-            Vector3 endPos = movePos[i % 2 == 0 ? 1 : 0].position;
-            float timer = 0;
-            attackCollider.SetActive(true);
+            // 돌진
+            boss.LookAt();
+            attackCollider[i].SetActive(true);
+            startPos = body.transform.position;
+            endPos = movePos[0].position;
+            timer = 0;
             while (timer < 1)
             {
-                timer += Time.deltaTime / moveSpeed;
+                timer += Time.deltaTime / moveSpeed[0];
+                anim.SetFloat("AnimValue", timer);
                 body.transform.position = Vector3.Lerp(startPos, endPos, EasingFunctions.OutExpo(timer));
                 yield return null;
             }
+            anim.SetFloat("AnimValue", 1);
             body.transform.position = endPos;
-            attackCollider.SetActive(false);
-            anim.SetBool("ComboRush", false);
-
-            // 검기
-            GameObject obj = Instantiate(slashVFX, slashPos.position, Quaternion.identity);
+            attackCollider[i].SetActive(false);
+            Slash();
 
             // 딜레이
-            if (i <= 2)
-            {
-                boss.Body_Setting(true);
-                yield return new WaitForSeconds(0.35f);
-            }
+            yield return new WaitForSeconds(0.15f);
+            
         }
 
-        boss.Body_Setting(false);
+
+        // 차징
+        anim.SetTrigger("Action");
+        anim.SetBool("isComboRushCharge", true);
+        boss.LookAt();
+        chargeVFX.SetActive(true);
+        chargeVFX2.SetActive(true);
+        yield return new WaitForSeconds(0.5f);
+        anim.SetBool("isComboRushCharge", false);
+
+        // 강 베기
+        anim.SetTrigger("Action");
+        anim.SetFloat("AnimValue", 0);
+        chargeVFX.SetActive(true);
+        boss.LookAt();
+        startPos = body.transform.position;
+        endPos = movePos[1].position;
+        timer = 0;
+        attackCollider[1].SetActive(true);
+        while (timer < 1)
+        {
+            timer += Time.deltaTime / moveSpeed[1];
+            anim.SetFloat("AnimValue", timer);
+            body.transform.position = Vector3.Lerp(startPos, endPos, EasingFunctions.OutExpo(timer));
+            yield return null;
+        }
+        body.transform.position = endPos;
+        attackCollider[1].SetActive(false);
+        anim.SetBool("isComboRush", false);
+        Slash();
+
         isUsed = false;
+    }
+
+    private void Slash()
+    {
+        Instantiate(slashVFX, slashPos.position, Quaternion.identity);
     }
 
     public override void Reset()
     {
         if (useCoroutine != null) StopCoroutine(useCoroutine);
-        body.GetComponent<Enemy_Boss5_New>().Body_Setting(false);
-        attackCollider.SetActive(false);
+        body.GetComponent<Enemy_Boss5_New>().Body_Setting(true);
+        chargeVFX.SetActive(false);
+        foreach (GameObject obj in attackCollider)
+        {
+            obj.SetActive(false);
+        }
     }
 }

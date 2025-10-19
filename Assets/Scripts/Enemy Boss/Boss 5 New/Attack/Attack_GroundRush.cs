@@ -8,8 +8,9 @@ public class Attack_GroundRush : Attack_Base
 {
     [Header("---Attack Setting---")]
     [SerializeField] private float moveSpeed;
-    [SerializeField] private GameObject attackCollider;
+    [SerializeField] private GameObject[] attackCollider;
     [SerializeField] private Transform movePos;
+    [SerializeField] private Enemy_Boss5_New boss;
 
 
     [Header("---Explosion Setting---")]
@@ -40,8 +41,9 @@ public class Attack_GroundRush : Attack_Base
         anim.SetFloat("AnimValue", 0);
 
         // 딜레이
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.35f);
         anim.SetBool("isGroundCharge", false);
+        boss.LookAt();
 
         // 돌진
         Vector3 startPos = body.transform.position;
@@ -50,25 +52,39 @@ public class Attack_GroundRush : Attack_Base
         RaycastHit2D hit = Physics2D.Raycast(startPos, moveDir.normalized, moveDir.magnitude, groundLayer);
         if (hit.collider != null) endPos = hit.point + hit.normal * 0.5f;
 
-        attackCollider.SetActive(true);
+        attackCollider[0].SetActive(true);
         float timer = 0;
         while(timer < 1)
         {
             timer += Time.deltaTime / moveSpeed;
             anim.SetFloat("AnimValue", timer);
-            transform.position = Vector3.Lerp(startPos, endPos, EasingFunctions.OutExpo(timer));
+            body.transform.position = Vector3.Lerp(startPos, endPos, EasingFunctions.OutExpo(timer));
             yield return null;
         }
         transform.position = endPos;
-        attackCollider.SetActive(false);
-        anim.SetBool("isGroundRush", false);
-        anim.SetFloat("AnimValue", 1);
-        SwordAura();
+        attackCollider[0].SetActive(false);
 
+        // 지면 폭발
+        Exposion();
+
+        // 딜레이
+        boss.LookAt();
+        yield return new WaitForSeconds(0.15f);
+
+        // 돌진 후 추가 베기
+        anim.SetTrigger("Action");
+        anim.SetFloat("AnimValue", 1);
+        yield return new WaitWhile(() => anim.GetBool("isGroundRush"));
         isUsed = false;
     }
 
-    private void SwordAura()
+
+    public void GroundRush_Attack()
+    {
+        attackCollider[1].SetActive(!attackCollider[1].activeSelf);
+    }
+
+    public void SwordAura()
     {
         GameObject obj = Instantiate(swordAura, shootPos.position, Quaternion.identity);
         Vector3 shootDir = (shootPos.position - body.transform.position).normalized;
@@ -76,7 +92,7 @@ public class Attack_GroundRush : Attack_Base
         bullet.Bullet_Setting(Enemy_Bullet.BulletType.None, shootDir, 15f, 30f, 15f);
     }
 
-    public void Exposion()
+    private void Exposion()
     {
         if (explosionCoroutine != null) StopCoroutine(explosionCoroutine);
         explosionCoroutine = StartCoroutine(ExposionCall());
@@ -84,7 +100,7 @@ public class Attack_GroundRush : Attack_Base
 
     private IEnumerator ExposionCall()
     {
-        WaitForSeconds wait = new WaitForSeconds(0.15f);
+        WaitForSeconds wait = new WaitForSeconds(0.05f);
 
         // 위치 저장
         List<Vector3> pos = new List<Vector3>();
@@ -96,7 +112,7 @@ public class Attack_GroundRush : Attack_Base
         // 폭발
         for (int i = 0; i < pos.Count; i++)
         {
-            GameObject obj = Instantiate(explosionVFX, pos[i], Quaternion.identity);
+            Instantiate(explosionVFX, pos[i], Quaternion.identity);
             yield return wait;
         }
     }
@@ -105,6 +121,10 @@ public class Attack_GroundRush : Attack_Base
     {
         if (useCoroutine != null) StopCoroutine(useCoroutine);
         if (explosionCoroutine != null) StopCoroutine(explosionCoroutine);
-        attackCollider.SetActive(false);
+        
+        foreach(GameObject obj in attackCollider)
+        {
+            obj.SetActive(false);
+        }
     }
 }

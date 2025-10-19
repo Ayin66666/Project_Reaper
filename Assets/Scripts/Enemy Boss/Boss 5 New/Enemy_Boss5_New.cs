@@ -18,6 +18,20 @@ public class Enemy_Boss5_New : Enemy_Base
     private Coroutine movementCoroutine;
 
 
+    private void Start()
+    {
+        Target_Setting();
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.J))
+        {
+            attack[1].Use();
+        }
+    }
+
+
     private void Think()
     {
         state = State.Think;

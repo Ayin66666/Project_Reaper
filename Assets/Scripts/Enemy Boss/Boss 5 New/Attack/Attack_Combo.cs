@@ -38,6 +38,12 @@ public class Attack_Combo : Attack_Base
         isUsed = false;
     }
 
+
+    public void Combo_Attack(int index)
+    {
+        attackCollider[index].SetActive(!attackCollider[index].activeSelf);
+    }
+
     public void ComboMove()
     {
         if (useCoroutine != null) StopCoroutine(useCoroutine);
@@ -46,7 +52,7 @@ public class Attack_Combo : Attack_Base
 
     private IEnumerator ComboMoveCall()
     {
-        Vector3 startPos = transform.position;
+        Vector3 startPos = body.transform.position;
         Vector3 endPos = movePos.position;
         float timer = 0f;
         while (timer < 1)
@@ -63,7 +69,8 @@ public class Attack_Combo : Attack_Base
     {
         GameObject obj = Instantiate(swordAura, shootPos.position, Quaternion.identity);
         Enemy_Bullet aura = obj.GetComponent<Enemy_Bullet>();
-        aura.Bullet_Setting(Enemy_Bullet.BulletType.None, body.transform.localScale.normalized, 25, 45f, 10f);
+        Vector3 dir = new Vector3(body.transform.localScale.normalized.x, 0, 0);
+        aura.Bullet_Setting(Enemy_Bullet.BulletType.None, dir, 25, 45f, 10f);
     }
 
     public override void Reset()
