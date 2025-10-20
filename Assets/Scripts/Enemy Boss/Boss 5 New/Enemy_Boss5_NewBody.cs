@@ -71,4 +71,50 @@ public class Enemy_Boss5_NewBody : MonoBehaviour
         anim.SetBool("isAOE", true);
     }
     #endregion
+
+
+    #region Upper Combo
+    public void UpperComboMove()
+    {
+        ((Attack_UpperCombo)attack[4]).Movement();
+    }
+
+    public void UpperComboCollider()
+    {
+        ((Attack_UpperCombo)attack[4]).Combo_Attack();
+    }
+
+    public void UpperComboSwordAura()
+    {
+        ((Attack_UpperCombo)attack[4]).SwordAura();
+    }
+
+    public void UpperComboUpperOver()
+    {
+        anim.SetBool("isUpperComboUpper", false);
+    }
+
+    public void UpperComboSlashOver()
+    {
+        anim.SetBool("isUpperComboSlash", false);
+    }
+    #endregion
+
+
+    #region Haif Moon
+    public void HaifMoonCollider()
+    {
+        ((Attack_HaifMoon)attack[5]).AttackCollider();
+    }
+
+    public void HaifMoonSlashAttackOver()
+    {
+        anim.SetBool("isHaifMoonSlashAttackOver", false);
+    }
+
+    public void HaifMoonOver()
+    {
+        anim.SetBool("isHaifMoonSlash", false);
+    }
+    #endregion
 }

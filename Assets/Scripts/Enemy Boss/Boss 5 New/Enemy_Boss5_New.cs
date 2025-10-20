@@ -28,7 +28,7 @@ public class Enemy_Boss5_New : Enemy_Base
     {
         if (Input.GetKeyDown(KeyCode.J))
         {
-            attack[3].Use();
+            attack[5].Use();
         }
     }
 
