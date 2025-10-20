@@ -75,7 +75,6 @@ public class Attack_ComboRush : Attack_Base
             
         }
 
-
         // ย๗ยก
         anim.SetTrigger("Action");
         anim.SetBool("isComboRushCharge", true);

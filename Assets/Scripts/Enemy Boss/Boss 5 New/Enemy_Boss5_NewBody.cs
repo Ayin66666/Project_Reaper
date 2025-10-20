@@ -63,4 +63,12 @@ public class Enemy_Boss5_NewBody : MonoBehaviour
         anim.SetBool("isGroundRush", false);
     }
     #endregion
+
+
+    #region AOE
+    public void AOEOver()
+    {
+        anim.SetBool("isAOE", true);
+    }
+    #endregion
 }

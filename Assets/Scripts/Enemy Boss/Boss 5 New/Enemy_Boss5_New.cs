@@ -15,6 +15,7 @@ public class Enemy_Boss5_New : Enemy_Base
 
     [Header("---Object---")]
     [SerializeField] private GameObject container;
+    [SerializeField] private GameObject body;
     private Coroutine movementCoroutine;
 
 
@@ -27,7 +28,7 @@ public class Enemy_Boss5_New : Enemy_Base
     {
         if (Input.GetKeyDown(KeyCode.J))
         {
-            attack[1].Use();
+            attack[3].Use();
         }
     }
 
@@ -53,10 +54,20 @@ public class Enemy_Boss5_New : Enemy_Base
     /// <param name="isOn"></param>
     public void Body_Setting(bool isOn)
     {
-
+        body.SetActive(isOn);
     }
 
-    #region 기본 동작
+    /// <summary>
+    /// 중력 설정 활성화 & 비활성화
+    /// </summary>
+    /// <param name="isOn"></param>
+    public void Rigid_Setting(bool isOn)
+    {
+        rigid.gravityScale = isOn ? 1 : 0;
+    }
+
+
+    #region 스폰 & 사망
     protected override void Spawn()
     {
         movementCoroutine = StartCoroutine(SpawnCall());
