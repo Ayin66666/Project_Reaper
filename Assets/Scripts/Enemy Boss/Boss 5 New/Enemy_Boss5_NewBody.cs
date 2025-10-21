@@ -23,6 +23,19 @@ public class Enemy_Boss5_NewBody : MonoBehaviour
     }
 
 
+    #region Spawn & Die
+    public void SpawnOver()
+    {
+        anim.SetBool("isSpawn", false);
+    }
+
+    public void DieOver()
+    {
+        anim.SetBool("isDie", false);
+    }
+    #endregion
+
+
     #region Combo
     public void Combo_Attack(int index)
     {
@@ -107,9 +120,9 @@ public class Enemy_Boss5_NewBody : MonoBehaviour
         ((Attack_HaifMoon)attack[5]).AttackCollider();
     }
 
-    public void HaifMoonSlashAttackOver()
+    public void HaifMoonSlashOver()
     {
-        anim.SetBool("isHaifMoonSlashAttackOver", false);
+        anim.SetBool("isHaifMoonSlashAttack", false);
     }
 
     public void HaifMoonOver()

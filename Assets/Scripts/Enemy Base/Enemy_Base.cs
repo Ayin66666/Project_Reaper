@@ -255,7 +255,8 @@ public abstract class Enemy_Base : MonoBehaviour
             }
 
             // Damage cal
-            StartCoroutine(HitEffect(hitCount, damage, isCritcal));
+            HitEffect(hitCount, damage, isCritcal);
+            // StartCoroutine(HitEffect(hitCount, damage, isCritcal));
         }
     }
 
@@ -302,7 +303,7 @@ public abstract class Enemy_Base : MonoBehaviour
         }
     }
 
-    private IEnumerator HitEffect(int hitCount, int damage, bool isCritcal)
+    private void HitEffect(int hitCount, int damage, bool isCritcal)
     {
         for (int i = 0; i < hitCount; i++)
         {
@@ -331,8 +332,9 @@ public abstract class Enemy_Base : MonoBehaviour
                 Die();
                 break;
             }
+
             // Effect Delay
-            yield return new WaitForSeconds(0.05f);
+            // yield return new WaitForSeconds(0.02f);
         }
     }
 

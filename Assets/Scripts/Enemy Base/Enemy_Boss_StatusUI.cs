@@ -68,7 +68,7 @@ public class Enemy_Boss_StatusUI : MonoBehaviour
 
         // Fade In
         float a = 0;
-        while(a < 1)
+        while (a < 1)
         {
             a += Time.deltaTime / 0.75f;
             fadeImage.color = new Color(fadeImage.color.r, fadeImage.color.g, fadeImage.color.b, a);
@@ -81,7 +81,7 @@ public class Enemy_Boss_StatusUI : MonoBehaviour
         // Name Fade In
         fadeNameText.gameObject.SetActive(true);
         a = 0;
-        while(a < 1)
+        while (a < 1)
         {
             a += Time.deltaTime / 0.75f;
             fadeNameText.color = new Color(fadeNameText.color.r, fadeNameText.color.g, fadeNameText.color.b, a);

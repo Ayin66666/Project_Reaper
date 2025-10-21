@@ -8,4 +8,9 @@ public class EffectAnim : MonoBehaviour
     {
         gameObject.SetActive(false);
     }
+
+    public void EndDestory()
+    {
+        Destroy(gameObject);
+    }
 }
