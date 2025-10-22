@@ -11,7 +11,6 @@ public class Stage_Room_PlayerChecker : MonoBehaviour
         // Player Check
         if (collision.CompareTag("Player") && !room.isActivate)
         {
-            Debug.Log("call Checker");
             // Player Add
             if (!room.players.Contains(collision.gameObject))
             {

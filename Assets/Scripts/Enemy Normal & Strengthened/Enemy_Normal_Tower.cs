@@ -36,8 +36,16 @@ public class Enemy_Normal_Tower : Enemy_Base
             return;
         }
 
+        if (state == State.Groggy && line.enabled == true)
+        {
+            line.enabled = false;
+        }
+
+        TimerCheck();
+
+
         // Find Target & Reset Enemy
-        if(attackRange.haveTarget)
+        if (attackRange.haveTarget)
         {
             curTarget = attackRange.targets[Random.Range(0, attackRange.targets.Count)];
             haveTarget = true;

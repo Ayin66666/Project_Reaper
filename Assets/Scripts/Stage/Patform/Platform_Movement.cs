@@ -68,6 +68,7 @@ public class Platform_Movement : Platform_Base
 
     private IEnumerator PlatformMovement()
     {
+        Debug.Log("Call Move");
         isActivate = true;
         isReset = false;
 

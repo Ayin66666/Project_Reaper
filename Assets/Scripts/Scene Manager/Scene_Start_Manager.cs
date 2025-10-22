@@ -1,7 +1,7 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using Easing;
+
 
 public class Scene_Start_Manager : MonoBehaviour
 {
@@ -10,34 +10,66 @@ public class Scene_Start_Manager : MonoBehaviour
     [SerializeField] private bool isOptionOn;
     [SerializeField] private bool isExitOn;
 
+
     [Header("---UI---")]
     [SerializeField] private GameObject roomUI;
     [SerializeField] private GameObject optionUI;
     [SerializeField] private GameObject exitUI;
 
+
+    [Header("---Fade---")]
+    [SerializeField] private CanvasGroup fadeCanvasGroup;
+    private bool isFade;
+
+
+    private void Start()
+    {
+        StartCoroutine(Fade(false));
+    }
+
     public void Update()
     {
-        if(Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.Escape))
         {
             Click_ESC();
         }
     }
 
+
+    private IEnumerator Fade(bool isOn)
+    {
+        isFade = true;
+        fadeCanvasGroup.gameObject.SetActive(true);
+        float start = isOn ? 0 : 1;
+        float end = isOn ? 1 : 0;
+        float timer = 0;
+        while (timer < 1)
+        {
+            timer += Time.deltaTime / 1.25f;
+            fadeCanvasGroup.alpha = Mathf.Lerp(start, end, EasingFunctions.OutExpo(timer));
+            yield return null;
+        }
+        fadeCanvasGroup.alpha = end;
+
+        if (!isOn) fadeCanvasGroup.gameObject.SetActive(false);
+        isFade = false;
+    }
+
     public void Click_ESC()
     {
-        if(isroomOn)
+        if (isroomOn)
         {
             isroomOn = false;
             roomUI.SetActive(false);
         }
 
-        if(isOptionOn)
+        if (isOptionOn)
         {
             isOptionOn = false;
             optionUI.SetActive(false);
         }
 
-        if(exitUI)
+        if (exitUI)
         {
             isExitOn = false;
             exitUI.SetActive(false);
@@ -46,14 +78,19 @@ public class Scene_Start_Manager : MonoBehaviour
 
     public void Click_Start()
     {
-        isroomOn = true;
-        roomUI.SetActive(true);
+        StartCoroutine(StartCall());
+    }
+
+    private IEnumerator StartCall()
+    {
+        StartCoroutine(Fade(true));
+        yield return new WaitWhile(() => isFade);
+        Scene_Loading_Manager.LoadScene("Scene_Stage1");
     }
 
     public void Click_Room()
     {
-        // Sene_SafeZone_Manager.NextSceneSetting("Scene_Stage1", 0, new Vector3(-32, 4.5f, 0));
-        Scene_Loading_Manager.LoadScene("Scene_Waiting");
+        Scene_Loading_Manager.LoadScene("Scene_Stage1");
     }
 
     public void Click_Option()

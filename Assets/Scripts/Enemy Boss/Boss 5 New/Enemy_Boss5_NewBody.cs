@@ -55,6 +55,8 @@ public class Enemy_Boss5_NewBody : MonoBehaviour
 
     public void ComboOver()
     {
+        Debug.Log("AnimEvent - ComboOver");
+        ((Attack_Combo)attack[0]).isUsed = false; // 임시방편
         anim.SetBool("isCombo", false);
     }
     #endregion
@@ -81,7 +83,7 @@ public class Enemy_Boss5_NewBody : MonoBehaviour
     #region AOE
     public void AOEOver()
     {
-        anim.SetBool("isAOE", true);
+        anim.SetBool("isAOE", false);
     }
     #endregion
 

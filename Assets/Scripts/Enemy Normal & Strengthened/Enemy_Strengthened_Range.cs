@@ -42,6 +42,11 @@ public class Enemy_Strengthened_Range : Enemy_Base
             return;
         }
 
+        if (state == State.Groggy && line.enabled == true)
+        {
+            line.enabled = false;
+        }
+
         // Find Target & Reset Enemy
         if (!haveTarget)
         {

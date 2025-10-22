@@ -43,6 +43,11 @@ public class Enemy_Normal_Range : Enemy_Base
             return;
         }
 
+        if(state == State.Groggy && line.enabled == true)
+        {
+            line.enabled = false;
+        }
+
         // Find Target & Reset Enemy
         if (!haveTarget)
         {
@@ -55,6 +60,7 @@ public class Enemy_Normal_Range : Enemy_Base
 
         // LR Wall Check
         WallCheck();
+        TimerCheck();
 
         // Think
         if (state == State.Idle && !isAttack && !isDie)

@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using Easing;
 
 public class Scene_Loading_Manager : MonoBehaviour
 {
@@ -19,6 +20,12 @@ public class Scene_Loading_Manager : MonoBehaviour
     [SerializeField] private Text tipText;
     [SerializeField] private string[] texts;
 
+
+    [Header("---Fade---")]
+    [SerializeField] private CanvasGroup fadeCanvasGroup;
+    private bool isFade;
+
+
     void Awake()
     {
         if (instance != null)
@@ -33,8 +40,10 @@ public class Scene_Loading_Manager : MonoBehaviour
 
     void Start()
     {
+        StartCoroutine(Fade(false, 0.5f));
         StartCoroutine(Loading());
     }
+
 
     public static void LoadScene(string sceneName)
     {
@@ -52,7 +61,26 @@ public class Scene_Loading_Manager : MonoBehaviour
         SceneManager.LoadScene("Scene_Loading");
     }
 
-    IEnumerator Tip()
+    private IEnumerator Fade(bool isOn, float speed)
+    {
+        isFade = true;
+        fadeCanvasGroup.gameObject.SetActive(true);
+        float start = isOn ? 0 : 1;
+        float end = isOn ? 1 : 0;
+        float timer = 0;
+        while (timer < 1)
+        {
+            timer += Time.deltaTime / speed;
+            fadeCanvasGroup.alpha = Mathf.Lerp(start, end, EasingFunctions.OutExpo(timer));
+            yield return null;
+        }
+        fadeCanvasGroup.alpha = end;
+
+        if (!isOn) fadeCanvasGroup.gameObject.SetActive(false);
+        isFade = false;
+    }
+
+    private IEnumerator Tip()
     {
         // Tip Text Fade Setting
         tipText.color = new Color(tipText.color.r, tipText.color.g, tipText.color.b, 0);
@@ -78,27 +106,23 @@ public class Scene_Loading_Manager : MonoBehaviour
                 yield return null;
             }
 
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(0.75f);
         }
     }
 
-    IEnumerator Loading()
+    private IEnumerator Loading()
     {
         Cursor.lockState = CursorLockMode.None;
 
         Debug.Log(nextScene);
         isLoading = true;
-        // StartCoroutine(nameof(Tip));
+        StartCoroutine(nameof(Tip));
         AsyncOperation operation = SceneManager.LoadSceneAsync(nextScene);
         operation.allowSceneActivation = false;
 
 
         while (!operation.isDone)
         {
-            Debug.Log(operation.progress);
-            Debug.Log(operation.isDone);
-            Debug.Log(progressbar.value);
-
             yield return null;
             if (progressbar.value < 0.9f)
             {
@@ -117,8 +141,15 @@ public class Scene_Loading_Manager : MonoBehaviour
                 loadText.text = "Press SpaceBar to Start.";
             }
 
-            if (Input.GetKeyDown(KeyCode.Space) && progressbar.value >= 1f && operation.progress >= 0.9f)
+            bool isInput = false;
+            if (Input.GetKeyDown(KeyCode.Space) && progressbar.value >= 1f && operation.progress >= 0.9f && !isInput)
             {
+                isInput = true;
+
+                // Fade
+                StartCoroutine(Fade(true, 1.25f));
+                yield return new WaitWhile(() => isFade);
+
                 // Scene Move
                 isLoading = false;
                 operation.allowSceneActivation = true;

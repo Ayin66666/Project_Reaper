@@ -126,6 +126,8 @@ public class Attack_UpperCombo : Attack_Base
 
     public override void Reset()
     {
+        isUsed = false;
+
         chargeVFX.SetActive(false);
         foreach (GameObject obj in attackCollider)
         {

@@ -1,5 +1,7 @@
+using Easing;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -52,6 +54,32 @@ public class Stage_Manager : MonoBehaviour
     [SerializeField] private GameObject waitingUI;
     [SerializeField] private Text waitingText;
 
+
+    [Header("---Fade---")]
+    [SerializeField] private CanvasGroup fadeCanvasGroup;
+    private bool isFade;
+    private bool isNext = false;
+
+
+    private IEnumerator Fade(bool isOn, float speed)
+    {
+        isFade = true;
+        fadeCanvasGroup.gameObject.SetActive(true);
+        float start = isOn ? 0 : 1;
+        float end = isOn ? 1 : 0;
+        float timer = 0;
+        while (timer < 1)
+        {
+            timer += Time.deltaTime / speed;
+            fadeCanvasGroup.alpha = Mathf.Lerp(start, end, EasingFunctions.OutExpo(timer));
+            yield return null;
+        }
+        fadeCanvasGroup.alpha = end;
+
+        if (!isOn) fadeCanvasGroup.gameObject.SetActive(false);
+        isFade = false;
+    }
+
     private void Start()
     {
         // Player Find
@@ -75,8 +103,12 @@ public class Stage_Manager : MonoBehaviour
         Timer();
     }
 
+
     private IEnumerator StartUI()
     {
+        StartCoroutine(Fade(false, 1.25f));
+        yield return new WaitWhile(() => isFade);
+
         isUI = true;
         startUI.SetActive(true);
         startText1.text = startT1;
@@ -184,6 +216,26 @@ public class Stage_Manager : MonoBehaviour
         isUI = false;
     }
 
+    private IEnumerator Next()
+    {
+        isNext = true;
+        StartCoroutine(Fade(true, 1.25f));
+        yield return new WaitWhile(() => isFade);
+
+        if (isLastStage)
+        {
+            Scene_Loading_Manager.LoadScene(nextScene);
+        }
+        else
+        {
+            // 다음 스테이지 입력
+            Sene_SafeZone_Manager.NextSceneSetting(nextScene, safeZoneMapIndex, NextScenePlayerPos);
+
+            // 대기실 이동
+            Scene_Loading_Manager.LoadScene(nextScene);
+        }
+    }
+
     private void Timer()
     {
         // Timer Check
@@ -220,8 +272,11 @@ public class Stage_Manager : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Player"))
+        if (collision.CompareTag("Player") && !isNext)
         {
+            StartCoroutine(Next());
+           
+            /*
             if (!playerList.Contains(collision.gameObject))
             {
                 playerList.Add(collision.gameObject);
@@ -241,6 +296,7 @@ public class Stage_Manager : MonoBehaviour
                     }
                 }
             }
+            */
         }
     }
 

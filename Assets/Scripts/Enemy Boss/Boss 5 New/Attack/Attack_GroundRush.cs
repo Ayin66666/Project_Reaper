@@ -119,6 +119,8 @@ public class Attack_GroundRush : Attack_Base
 
     public override void Reset()
     {
+        isUsed = false;
+
         if (useCoroutine != null) StopCoroutine(useCoroutine);
         if (explosionCoroutine != null) StopCoroutine(explosionCoroutine);
         

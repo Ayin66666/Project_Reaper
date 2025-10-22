@@ -246,7 +246,7 @@ public class Enemy_Strengthened_Melee : Enemy_Base
         timer = 0;
         while (timer < 1)
         {
-            timer += Time.deltaTime * dashPower;
+            timer += Time.deltaTime / dashPower;
             transform.position = Vector3.Lerp(startPos, endPos, EasingFunctions.OutExpo(timer));
             yield return null;
         }

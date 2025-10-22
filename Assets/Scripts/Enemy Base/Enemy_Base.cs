@@ -13,6 +13,7 @@ public abstract class Enemy_Base : MonoBehaviour
     [SerializeField] protected Collider2D aiCollider;
     [SerializeField] protected Rigidbody2D rigid;
     [SerializeField] protected Animator anim;
+    [SerializeField] protected Transform bodyObj;
     [SerializeField] protected SpriteRenderer spriteRenderer;
     public Enemy_StatusDataSO status;
 
@@ -41,6 +42,8 @@ public abstract class Enemy_Base : MonoBehaviour
     protected Coroutine hitAirborneCoroutine;
     protected Coroutine hitKnockbackCoroutine;
     protected Coroutine hitDownAttackCoroutine;
+    protected Coroutine ShakeCorouttine;
+
 
     protected enum EnemyType { Normal, Tower, Part, Object, Boss, BossTower }
     [SerializeField] protected EnemyType enemyType;
@@ -48,7 +51,7 @@ public abstract class Enemy_Base : MonoBehaviour
     public State state;
     protected enum CurLook { None, Left, Right }
     [SerializeField] protected CurLook curLook;
-    public enum HitType { None, Stagger, AirBorne, DownAttack ,KnockBack }
+    public enum HitType { None, Stagger, AirBorne, DownAttack, KnockBack }
 
 
     [Header("---Status---")]
@@ -108,14 +111,13 @@ public abstract class Enemy_Base : MonoBehaviour
 
     protected void Target_Setting()
     {
-        if(targetList.Count <= 0)
+        if (targetList.Count <= 0)
         {
             // Find Player
             GameObject[] targets = GameObject.FindGameObjectsWithTag("Player");
             for (int i = 0; i < targets.Length; i++)
             {
                 targetList.Add(targets[i]);
-                Debug.Log(targetList[i]);
             }
 
             if (targets.Length > 0)
@@ -138,14 +140,14 @@ public abstract class Enemy_Base : MonoBehaviour
             // List Check
             for (int i = 0; i < targetList.Count; i++)
             {
-                if(targetList[i] == null)
+                if (targetList[i] == null)
                 {
                     targetList.RemoveAt(i);
                 }
             }
 
             // Target Setting
-            if(targetList.Count > 0)
+            if (targetList.Count > 0)
             {
                 int ran = Random.Range(0, targetList.Count);
                 curTarget = targetList[ran];
@@ -160,7 +162,7 @@ public abstract class Enemy_Base : MonoBehaviour
 
     protected void CurTarget_Check()
     {
-        if(haveTarget)
+        if (haveTarget)
         {
             targetVector = curTarget.transform.position - transform.position;
             targetDir = targetVector.magnitude;
@@ -169,7 +171,7 @@ public abstract class Enemy_Base : MonoBehaviour
 
     public void LookAt()
     {
-        if(haveTarget)
+        if (haveTarget)
         {
             // 이거 연속으로 호출되면 이상하게 쳐다보는 문제가 있는거 같은데 확인해볼것!
             targetVector = curTarget.transform.position - transform.position;
@@ -193,7 +195,7 @@ public abstract class Enemy_Base : MonoBehaviour
     public void TakeDamage(GameObject player, int damage, int hitCount, bool isCritcal, HitType hitType, float t, Vector3 pos)
     {
         // Die Check
-        if(isDie || isHit || isInvincibility)
+        if (isDie || isHit || isInvincibility)
         {
             return;
         }
@@ -221,6 +223,10 @@ public abstract class Enemy_Base : MonoBehaviour
             // Attack Type Check
             if (canHitEffect) // -> 이 부분에 에러가 있음 -> 비활성화 되서 동작 안한느듯?
             {
+                if (hitStopCoroutine != null) StopCoroutine(hitStopCoroutine);
+                state = State.Groggy;
+                isAttack = false;
+
                 switch (hitType)
                 {
                     case HitType.None:
@@ -228,26 +234,22 @@ public abstract class Enemy_Base : MonoBehaviour
                         break;
 
                     case HitType.Stagger:
-                        if(isAirBorne) TimerAdd(t);
-                        HitStopCoroutine();
+                        if (isAirBorne) TimerAdd(t);
                         StopHitMoveCoroutine();
                         break;
 
                     case HitType.AirBorne:
-                        HitStopCoroutine();
                         StopHitMoveCoroutine();
                         hitAirborneCoroutine = StartCoroutine(AirBorneMove(pos, t));
                         break;
 
                     case HitType.DownAttack:
-                        HitStopCoroutine();
                         StopHitMoveCoroutine();
                         hitDownAttackCoroutine = StartCoroutine(DownAttackMove(t));
                         break;
 
                     case HitType.KnockBack:
                         if (isAirBorne) TimerAdd(t);
-                        HitStopCoroutine();
                         StopHitMoveCoroutine();
                         hitKnockbackCoroutine = StartCoroutine(KnockBackMove(player, t));
                         break;
@@ -256,7 +258,6 @@ public abstract class Enemy_Base : MonoBehaviour
 
             // Damage cal
             HitEffect(hitCount, damage, isCritcal);
-            // StartCoroutine(HitEffect(hitCount, damage, isCritcal));
         }
     }
 
@@ -265,7 +266,7 @@ public abstract class Enemy_Base : MonoBehaviour
         switch (enemyType)
         {
             case EnemyType.Normal:
-                if(hitStopCoroutine != null) StopCoroutine(hitStopCoroutine);
+                if (hitStopCoroutine != null) StopCoroutine(hitStopCoroutine);
                 state = State.Groggy;
                 isAttack = false;
                 break;
@@ -281,30 +282,28 @@ public abstract class Enemy_Base : MonoBehaviour
 
     private void StopHitMoveCoroutine()
     {
-        // 피격 이동 도중 재차 피격되었을 때 기존 이동기능을 초기화
-        if(hitAirborneCoroutine != null)
-        {
-            StopCoroutine(hitAirborneCoroutine);
-            isAirBorneMove = false;
-        }
+        // 피격 이동 도중 재차 피격되었을 때 기존 이동기능 초기화
+        isAirBorneMove = false;
+        isDownAttack = false;
+        isKnockBack = false;
 
-        if(hitDownAttackCoroutine != null)
-        {
-            StopCoroutine(hitDownAttackCoroutine);
-            isDownAttack = false;
-            isAirBorneMove = false;
-        }
-
-        if(hitKnockbackCoroutine != null)
-        {
-            StopCoroutine(hitKnockbackCoroutine);
-            isKnockBack = false;
-            isAirBorneMove = false;
-        }
+        // 이거 stopcoroutine 때매 안되는걸지도? - 일단 bool 값 꺼지면 코루틴은 종료가 맞음
+        /*
+        if (hitAirborneCoroutine != null) StopCoroutine(hitAirborneCoroutine);
+        if (hitDownAttackCoroutine != null) StopCoroutine(hitDownAttackCoroutine);
+        if (hitKnockbackCoroutine != null) StopCoroutine(hitKnockbackCoroutine);
+        */
     }
 
+    /// <summary>
+    /// 피격 시 바디 흔들림
+    /// </summary>
+    /// <param name="hitCount"></param>
+    /// <param name="damage"></param>
+    /// <param name="isCritcal"></param>
     private void HitEffect(int hitCount, int damage, bool isCritcal)
     {
+        ShakeEffect(0.1f, Random.Range(0.1f, 0.3f));
         for (int i = 0; i < hitCount; i++)
         {
             // Damage Cal -> 타격 횟수만큼 데미지를 나눠서 출력
@@ -332,10 +331,32 @@ public abstract class Enemy_Base : MonoBehaviour
                 Die();
                 break;
             }
-
-            // Effect Delay
-            // yield return new WaitForSeconds(0.02f);
         }
+    }
+
+    public void ShakeEffect(float duration, float strength)
+    {
+        if (ShakeCorouttine != null) StopCoroutine(ShakeCorouttine);
+        StartCoroutine(ShakeRoutine(duration, strength));
+    }
+
+    private IEnumerator ShakeRoutine(float duration, float strength)
+    {
+        Vector3 originalPos = bodyObj.localPosition;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            float offsetX = Random.Range(-1f, 1f) * strength;
+            float offsetY = Random.Range(-1f, 1f) * strength;
+
+            bodyObj.localPosition = originalPos + new Vector3(offsetX, offsetY, 0f);
+
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        bodyObj.localPosition = originalPos; // 위치 복원
     }
 
     private IEnumerator HitInvincible()
@@ -347,7 +368,7 @@ public abstract class Enemy_Base : MonoBehaviour
 
     private void TimerAdd(float time)
     {
-        if(airBorneTimer + time > maxAirborneTimer)
+        if (airBorneTimer + time > maxAirborneTimer)
         {
             airBorneTimer = maxAirborneTimer;
         }
@@ -369,11 +390,11 @@ public abstract class Enemy_Base : MonoBehaviour
             if (airBorneTimer > 0)
             {
                 airBorneTimer -= Time.deltaTime;
-                if (airBorneTimer <= 0 && isAirBorne)
+                if (airBorneTimer <= 0)
                 {
                     Debug.Log("EndCall");
 
-                    // state = State.Idle;
+                    state = State.Idle;
                     airBorneTimer = 0;
                     rigid.gravityScale = 1;
                 }
@@ -381,9 +402,10 @@ public abstract class Enemy_Base : MonoBehaviour
         }
     }
 
+
     private IEnumerator AirBorneMove(Vector3 airBornePos, float power)
     {
-        if(enemyType != EnemyType.Normal)
+        if (enemyType != EnemyType.Normal)
         {
             yield break;
         }
@@ -398,7 +420,7 @@ public abstract class Enemy_Base : MonoBehaviour
         // Move
         Vector3 startPos = transform.position;
         float timer = 0;
-        while(timer < 1 && isAirBorneMove)
+        while (timer < 1 && isAirBorneMove)
         {
             timer += Time.deltaTime * power;
             transform.position = Vector2.Lerp(startPos, airBornePos, EasingFunctions.OutExpo(timer));
@@ -408,6 +430,7 @@ public abstract class Enemy_Base : MonoBehaviour
 
         isAirBorneMove = false;
         rigid.gravityScale = 1;
+        state = State.Idle;
     }
 
     private IEnumerator KnockBackMove(GameObject player, float power)
@@ -418,7 +441,7 @@ public abstract class Enemy_Base : MonoBehaviour
         rigid.gravityScale = 0;
 
         // MovePos Setting
-        Vector3 knockBackDir = (transform.position- player.transform.position).normalized;
+        Vector3 knockBackDir = (transform.position - player.transform.position).normalized;
         knockBackDir.y = 0;
 
         RaycastHit2D hit = Physics2D.Raycast(transform.position, knockBackDir, 5f, groundLayer);
@@ -430,7 +453,7 @@ public abstract class Enemy_Base : MonoBehaviour
 
         // Move
         float timer = 0;
-        while(timer < 1 && isAirBorneMove)
+        while (timer < 1 && isAirBorneMove)
         {
             timer += Time.deltaTime * power;
             transform.position = Vector3.Lerp(startPos, endPos, EasingFunctions.OutExpo(timer));
@@ -440,6 +463,8 @@ public abstract class Enemy_Base : MonoBehaviour
         isKnockBack = false;
         isAirBorneMove = false;
         rigid.gravityScale = 1;
+
+        state = State.Idle;
     }
 
     private IEnumerator DownAttackMove(float power)
@@ -473,6 +498,8 @@ public abstract class Enemy_Base : MonoBehaviour
             isAirBorneMove = false;
             rigid.velocity = Vector2.zero;
             rigid.gravityScale = 1;
+
+            state = State.Idle;
         }
     }
 
@@ -489,7 +516,7 @@ public abstract class Enemy_Base : MonoBehaviour
             isGround = hit;
             Debug.DrawRay(transform.position, Vector2.down, Color.red, aiCollider.bounds.size.y + 0.15f);
         }
-        
+
         if (isGround)
         {
             isAirBorne = false;

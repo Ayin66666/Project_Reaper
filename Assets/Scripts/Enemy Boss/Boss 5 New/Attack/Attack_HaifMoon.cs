@@ -187,7 +187,7 @@ public class Attack_HaifMoon : Attack_Base
     /// </summary>
     /// <param name="isOn"></param>
     /// <param name="speed"></param>
-    private void BackgroundFade(bool isOn, float speed)
+    public void BackgroundFade(bool isOn, float speed)
     {
         if (backgroundFadeCoroutine != null) StopCoroutine(backgroundFadeCoroutine);
         backgroundFadeCoroutine = StartCoroutine(BackgroundFadeCall(isOn, speed));
@@ -226,6 +226,8 @@ public class Attack_HaifMoon : Attack_Base
 
     public override void Reset()
     {
+        isUsed = false;
+
         if (useCoroutine != null) StopCoroutine(useCoroutine);
         boss.Body_Setting(true);
         boss.Rigid_Setting(true);

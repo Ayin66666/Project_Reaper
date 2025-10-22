@@ -115,6 +115,8 @@ public class Attack_ComboRush : Attack_Base
 
     public override void Reset()
     {
+        isUsed = false;
+
         if (useCoroutine != null) StopCoroutine(useCoroutine);
         body.GetComponent<Enemy_Boss5_New>().Body_Setting(true);
         chargeVFX.SetActive(false);
