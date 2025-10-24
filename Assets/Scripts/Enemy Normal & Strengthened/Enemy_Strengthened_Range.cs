@@ -196,7 +196,7 @@ public class Enemy_Strengthened_Range : Enemy_Base
         // Animation
         anim.SetTrigger("Attack");
         anim.SetBool("isNormalAttack", true);
-        while (anim.GetBool("isNoramlAttack"))
+        while (anim.GetBool("isNormalAttack"))
         {
             yield return null;
         }

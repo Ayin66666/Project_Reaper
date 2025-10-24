@@ -167,6 +167,11 @@ public class Enemy_Normal_Melee : Enemy_Base
         Vector3 endPos = dashPos.position;
         endPos.y = transform.position.y;
 
+        // º® Ã¼Å©
+        Vector2 moveDir = endPos - startPos;
+        RaycastHit2D hit = Physics2D.Raycast(startPos, moveDir.normalized, moveDir.magnitude, groundLayer);
+        if (hit.collider != null) endPos = hit.point + hit.normal * 0.5f;
+
         // Attack Sound
         sound.SoundPlay_Other(1);
 

@@ -1,167 +1,234 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class Option_Manager : MonoBehaviour
 {
     public static Option_Manager instance;
 
-    [Header("---Sound UI---")]
-    [SerializeField] private GameObject optionUI;
-    [SerializeField] private AudioMixer mixer;
+    [Header("=== Sound Setting ===")]
+    [SerializeField] private AudioMixer audioMixer;
+    [SerializeField] private Slider master_slider;
+    [SerializeField] private Slider bgm_slider;
+    [SerializeField] private Slider sfx_slider;
 
-    [Header("---Sound Setting---")]
-    [SerializeField] private float masterSound;
-    [SerializeField] private float bgmSound;
-    [SerializeField] private float sfxSound;
-    [SerializeField] private bool masterSoundOn;
-    [SerializeField] private bool bgmSoundOn;
-    [SerializeField] private bool sfxSoundOn;
-    [SerializeField] private bool isOptionOn;
 
-    private void Awake()
+    [Header("=== FPS Setting ===")]
+    [SerializeField] private Dropdown fpsDropDown;
+
+
+    // (장비, 인벤, 스킬, 옵션) 창
+    [Header("=== Option UI ===")]
+    public GameObject menuSet;
+    public GameObject optionSet;
+    public GameObject exitSet;
+    [SerializeField] private Toggle fpsToggle;
+    private float deltaTime = 0f;
+    [SerializeField] private GameObject option_BackGround;
+
+
+
+    // 여기 두개 불값으로 옵션창 켜진거 확인 & 옵션창에서 나가기 버튼 누른건지 확인
+    public bool isOptionOn;
+    public bool isExitOn;
+    public bool isFpsOn;
+    public bool isMenuOn;
+
+    void Awake()
     {
         if (instance == null)
         {
             instance = this;
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
             Destroy(gameObject);
         }
 
-        StartSoundOn();
-        DontDestroyOnLoad(gameObject);
+        master_slider.onValueChanged.AddListener(SetMasterVolume);
+        bgm_slider.onValueChanged.AddListener(SetBgmVolume);
+        sfx_slider.onValueChanged.AddListener(SetSfxVolume);
+
+        fpsDropDown.value = 1;
     }
 
-    private void FixedUpdate()
+    private void Update()
     {
-        Scene currentScene = SceneManager.GetActiveScene();
-        int sceneBuildIndex = currentScene.buildIndex;
+        //FPS 표시 및 설정용
+        deltaTime += (Time.unscaledDeltaTime - deltaTime) * 0.1f;
 
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if(sceneBuildIndex == 0)
+            if (isMenuOn)
             {
-                if(isOptionOn)
-                {
-                    Check_Out();
-                }
-                else
-                {
-                    OptionOn();
-                }
+                Off_Menu();
             }
             else
             {
-                Check_Out();
+                On_Menu();
             }
         }
     }
 
-    // Sound Setting
-    #region
-    private void StartSoundOn()
+    public void On_Menu()
     {
-        masterSoundOn = true;
-        bgmSoundOn = true;
-        sfxSoundOn = true;
+        menuSet.SetActive(true);
+        isMenuOn = true;
 
-        masterSound = 1f;
-        mixer.SetFloat("Master", Mathf.Log10(masterSound) * 20);
-
-        bgmSound = 1f;
-        mixer.SetFloat("BGM", Mathf.Log10(bgmSound) * 20);
-
-        sfxSound = 1f;
-        mixer.SetFloat("SFX", Mathf.Log10(sfxSound) * 20);
-    }
-
-    public void Toggle_Master(bool val)
-    {
-        masterSoundOn = val;
-        if (masterSoundOn)
+        if (SceneManager.GetActiveScene().name == "Scene_Start")
         {
-            mixer.SetFloat("Master", Mathf.Log10(masterSound) * 20);
+            option_BackGround.SetActive(true);
         }
         else
         {
-            mixer.SetFloat("Master", 0.01f);
+            option_BackGround.SetActive(true);
+            exitSet.SetActive(false);
         }
     }
 
-    public void Toggle_BGM(bool val)
+    public void Off_Menu()
     {
-        bgmSoundOn = val;
-        if (bgmSoundOn)
+        menuSet.SetActive(false);
+        isMenuOn = false;
+    }
+
+    public void Menu_Click_Exit()
+    {
+        if (SceneManager.GetActiveScene().name == "Scene_Start")
         {
-            mixer.SetFloat("BGM", Mathf.Log10(bgmSound) * 20);
+            Off_Menu();
+            Sound_Manager.instance.SFXPlay_OneShot(Sound_Manager.instance.onClick);
         }
         else
         {
-            mixer.SetFloat("BGM", 0.01f);
+            isExitOn = true;
+            exitSet.SetActive(true);
+            Sound_Manager.instance.SFXPlay_OneShot(Sound_Manager.instance.onClick);
         }
     }
 
-    public void Toggle_SFX(bool val)
+    public void Menu_Click_ExitOff()
     {
-        sfxSoundOn = val;
-        if (sfxSoundOn)
+        isExitOn = false;
+        exitSet.SetActive(false);
+        Sound_Manager.instance.SFXPlay_OneShot(Sound_Manager.instance.onClick);
+    }
+
+    public void Menu_Click_Option()
+    {
+        //옵션창 키기
+        OnOff_Option(true);
+
+        // 클릭 사운드
+        Sound_Manager.instance.SFXPlay_OneShot(Sound_Manager.instance.onClick);
+    }
+
+    public void OnOff_Option(bool isOn)
+    {
+        isOptionOn = isOn;
+        optionSet.SetActive(isOn);
+    }
+
+
+    public void Click_Start()
+    {
+        Scene_Loading_Manager.LoadScene("Scene_Stage1");
+    }
+
+    public void Exit_Game()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
+    }
+
+
+    #region FPS Setting
+
+    public void FpsOn()
+    {
+        if (fpsToggle.isOn)
         {
-            mixer.SetFloat("SFX", Mathf.Log10(sfxSound) * 20);
+            isFpsOn = true;
         }
         else
         {
-            mixer.SetFloat("SFX", 0.01f);
+            isFpsOn = false;
         }
     }
 
-    public void Sound_Master(float val)
+    private void OnGUI()
     {
-        masterSound = val;
-        if (masterSoundOn)
+        if (isFpsOn && SceneManager.GetActiveScene().name != "Loading_Scene")
         {
-            mixer.SetFloat("Master", Mathf.Log10(masterSound) * 20);
+            GUIStyle style = new GUIStyle();
+
+            Rect rect = new Rect(30, 30, Screen.width, Screen.height);
+            style.alignment = TextAnchor.UpperLeft;
+            style.fontSize = 25;
+            style.normal.textColor = Color.red;
+
+            float ms = deltaTime * 1000f;
+            float fps = 1.0f / deltaTime;
+            string text = string.Format("{0:0.} FPS ({1:0.0} ms)", fps, ms);
+
+            GUI.Label(rect, text, style);
+        }
+        else
+        {
+            return;
         }
     }
 
-    public void Sound_BGM(float val)
+    public void SetFPS(int value)
     {
-        bgmSound = val;
-        if (bgmSoundOn)
+        if (fpsDropDown.value == 0)
         {
-            mixer.SetFloat("BGM", Mathf.Log10(bgmSound) * 20);
+            value = 30;
         }
+        else if (fpsDropDown.value == 1)
+        {
+            value = 60;
+        }
+        else if (fpsDropDown.value == 2)
+        {
+            value = 90;
+        }
+        else if (fpsDropDown.value == 3)
+        {
+            value = 120;
+        }
+        else if (fpsDropDown.value == 4)
+        {
+            value = 144;
+        }
+        else if (fpsDropDown.value == 5)
+        {
+            value = 165;
+        }
+
+        Application.targetFrameRate = value;
+    }
+    #endregion
+
+
+    #region Sound Setting
+    public void SetMasterVolume(float volume)
+    {
+        audioMixer.SetFloat("Master", Mathf.Log10(volume) * 20);
     }
 
-    public void Sound_SFX(float val)
+    public void SetBgmVolume(float volume)
     {
-        sfxSound = val;
-        if (sfxSoundOn)
-        {
-            mixer.SetFloat("SFX", Mathf.Log10(sfxSound) * 20);
-        }
+        audioMixer.SetFloat("BGM", Mathf.Log10(volume) * 20);
     }
-
-    public void OptionOn()
+    public void SetSfxVolume(float volume)
     {
-        if(!isOptionOn)
-        {
-            isOptionOn = true;
-            optionUI.SetActive(true);
-        }
-    }
-
-    public void Check_Out()
-    {
-        if(isOptionOn)
-        {
-            isOptionOn = false;
-            optionUI.SetActive(false);
-        }
+        audioMixer.SetFloat("SFX", Mathf.Log10(volume) * 20);
     }
     #endregion
 }

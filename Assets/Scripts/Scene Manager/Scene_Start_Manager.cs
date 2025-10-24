@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using Easing;
+using Unity.VisualScripting.Antlr3.Runtime;
 
 
 public class Scene_Start_Manager : MonoBehaviour
@@ -97,12 +98,21 @@ public class Scene_Start_Manager : MonoBehaviour
     {
         isOptionOn = true;
         optionUI.SetActive(true);
+        Sound_Manager.instance.SFXPlay_OneShot(Sound_Manager.instance.onClick);
     }
 
     public void Click_Exit()
     {
         isExitOn = true;
         exitUI.SetActive(true);
+        Sound_Manager.instance.SFXPlay_OneShot(Sound_Manager.instance.onClick);
+    }
+
+    public void Click_ExitOff()
+    {
+        isExitOn = false;
+        exitUI.SetActive(false);
+        Sound_Manager.instance.SFXPlay_OneShot(Sound_Manager.instance.onClick);
     }
 
     public void Click_GameOut()

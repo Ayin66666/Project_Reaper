@@ -9,13 +9,13 @@ public abstract class Enemy_Base : MonoBehaviour
     [Header("---Compoment---")]
     [SerializeField] protected Enemy_Boss_StatusUI statusUI_Boss;
     [SerializeField] protected Enemy_Normal_StatusUI statusUI_Normal;
-    [SerializeField] protected Enemy_Sound sound;
     [SerializeField] protected Collider2D aiCollider;
     [SerializeField] protected Rigidbody2D rigid;
     [SerializeField] protected Animator anim;
     [SerializeField] protected Transform bodyObj;
     [SerializeField] protected SpriteRenderer spriteRenderer;
     public Enemy_StatusDataSO status;
+    public Enemy_Sound sound;
 
 
     [Header("---State---")]
@@ -27,7 +27,7 @@ public abstract class Enemy_Base : MonoBehaviour
     protected bool isDie;
     protected bool isHit;
     protected bool isInvincibility;
-    protected bool canHitEffect;
+    [SerializeField] protected bool canHitEffect;
     [SerializeField] protected bool haveTarget;
 
     // Hit
@@ -93,6 +93,7 @@ public abstract class Enemy_Base : MonoBehaviour
         moveSpeed = status.MoveSpeed;
         attackSpeed = status.AttackSpeed;
         score = status.Score;
+        canHitEffect = enemyType == EnemyType.Boss ? false : true;
 
         switch (enemyType)
         {
@@ -200,7 +201,6 @@ public abstract class Enemy_Base : MonoBehaviour
             return;
         }
 
-        canHitEffect = true;
         if (damage > 0)
         {
             // 피격 무적
@@ -392,8 +392,6 @@ public abstract class Enemy_Base : MonoBehaviour
                 airBorneTimer -= Time.deltaTime;
                 if (airBorneTimer <= 0)
                 {
-                    Debug.Log("EndCall");
-
                     state = State.Idle;
                     airBorneTimer = 0;
                     rigid.gravityScale = 1;
@@ -419,6 +417,11 @@ public abstract class Enemy_Base : MonoBehaviour
 
         // Move
         Vector3 startPos = transform.position;
+        /*
+        Vector2 dir = airBornePos - startPos;
+        RaycastHit2D hit = Physics2D.Raycast(startPos, dir.normalized, dir.magnitude);
+        if (hit.collider != null) airBornePos = hit.point + hit.normal * 1f;
+        */
         float timer = 0;
         while (timer < 1 && isAirBorneMove)
         {
@@ -483,7 +486,7 @@ public abstract class Enemy_Base : MonoBehaviour
             // MovePos Setting
             RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, 100f, groundLayer);
             Vector2 startPos = transform.position;
-            Vector2 endPos = hit.point != null ? hit.point : new Vector2(transform.position.x, transform.position.y - 5);
+            Vector2 endPos = hit.point + hit.normal * 1f;
 
             // Move
             float timer = 0;

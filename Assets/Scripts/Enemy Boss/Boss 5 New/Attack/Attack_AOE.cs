@@ -1,4 +1,5 @@
 using Easing;
+using System;
 using System.Collections;
 using UnityEditor.Rendering;
 using UnityEngine;
@@ -105,7 +106,11 @@ public class Attack_AOE : Attack_Base
 
         // 공중 난무
         attackCollider[3].SetActive(true);
-        yield return new WaitForSeconds(2f);
+        for (int i = 0; i < 4; i++)
+        {
+            boss.sound.SoundPlay_Other(5);
+            yield return new WaitForSeconds(0.2f);
+        }
         attackCollider[3].SetActive(false);
         boss.Body_Setting(true);
 

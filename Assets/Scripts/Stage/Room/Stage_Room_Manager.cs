@@ -50,6 +50,7 @@ public class Stage_Room_Manager : Stage_Room_Base
         {
             for (int i = 0; i < objectDoor.Length; i++)
             {
+                objectDoor[i].gameObject.SetActive(true);
                 objectDoor[i].Object_Setting();
             }
         }

@@ -22,9 +22,10 @@ public class Stage_Enemy_Spawner : MonoBehaviour
     [SerializeField] private List<GameObject> enemy_Object;
     [SerializeField] private GameObject[] objectSpawnEnemys;
     [SerializeField] private Transform[] spawnPos;
+    [SerializeField] private int maxSpawnCount;
     [SerializeField] private float spawnTimer;
     [SerializeField] private GameObject spawnVFX;
-    private float timer;
+    [SerializeField] private float timer;
 
 
     [Header("---Boss Spawn SEtting---")]
@@ -167,6 +168,7 @@ public class Stage_Enemy_Spawner : MonoBehaviour
     {
         isSpawn = true;
         timer = 0;
+        maxSpawnCount = spawnPos.Length;
         curCheckCoroutine = StartCoroutine(Object_Check());
 
         while (isSpawn)
@@ -181,13 +183,18 @@ public class Stage_Enemy_Spawner : MonoBehaviour
             if (timer <= 0)
             {
                 timer = spawnTimer;
-                for (int i2 = 0; i2 < spawnPos.Length; i2++)
+                enemys.RemoveAll(e => e == null);
+                if (enemys.Count < maxSpawnCount)
                 {
-                    GameObject obj = Instantiate(objectSpawnEnemys[Random.Range(0, objectSpawnEnemys.Length)], spawnPos[Random.Range(0, spawnPos.Length)].position, Quaternion.identity);
-                    enemys.Add(obj);
+                    int spawnCount = maxSpawnCount - enemys.Count;
+                    for (int i2 = 0; i2 < spawnCount; i2++)
+                    {
+                        GameObject obj = Instantiate(objectSpawnEnemys[Random.Range(0, objectSpawnEnemys.Length)], spawnPos[Random.Range(0, spawnPos.Length)].position, Quaternion.identity);
+                        enemys.Add(obj);
 
-                    // ÀÌÆåÆ®
-                    Instantiate(spawnVFX, obj.transform.position, Quaternion.identity);
+                        // ÀÌÆåÆ®
+                        Instantiate(spawnVFX, obj.transform.position, Quaternion.identity);
+                    }
                 }
             }
 
@@ -198,23 +205,18 @@ public class Stage_Enemy_Spawner : MonoBehaviour
     private IEnumerator Object_Check()
     {
         float count = enemy_Object.Count;
-        while(count > 0)
+        while (count > 0)
         {
             // Object Check
             for (int i = 0; i < enemy_Object.Count; i++)
             {
                 // Object Spawn
-                enemy_Object[0].SetActive(true);
-                while (enemy_Object[0] != null)
+                enemy_Object[i].SetActive(true);
+                while (enemy_Object[i] != null)
                 {
                     yield return null;
                 }
 
-                // Spawn Speed Up
-                spawnTimer *= 0.9f;
-
-                // List Update
-                enemy_Object.RemoveAt(0);
                 count--;
             }
 
@@ -236,7 +238,6 @@ public class Stage_Enemy_Spawner : MonoBehaviour
                 {
                     enemys[i].GetComponent<Enemy_Base>().Die();
                 }
-                //enemys[i].GetComponent<Enemy_Base>().TakeDamage(gameObject, 99999, 1, false, Enemy_Base.HitType.None, 1, transform.position); ;
             }
         }
 

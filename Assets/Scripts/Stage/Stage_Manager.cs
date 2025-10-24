@@ -1,14 +1,15 @@
 using Easing;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
 
 public class Stage_Manager : MonoBehaviour
 {
+
     [Header("---Start Setting---")]
+    [SerializeField] private Transform start_Pos;
     [SerializeField] private AudioSource bgmSound;
     [SerializeField] private bool haveStartBGM;
     [SerializeField] private string startT1;
@@ -84,6 +85,7 @@ public class Stage_Manager : MonoBehaviour
     {
         // Player Find
         playerCount = GameObject.FindGameObjectsWithTag("Player").Length;
+        Player_Container_Script.instance.player.transform.position = start_Pos.position;
 
         // Clear Timer Setting
         curTimer = waitTime;

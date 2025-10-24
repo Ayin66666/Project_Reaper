@@ -234,10 +234,14 @@ public class Enemy_Strengthened_Melee : Enemy_Base
         anim.SetBool("isDashReady", false);
 
         // Dash Setting
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, (dashPos.position - transform.position).normalized, (dashPos.position - transform.position).magnitude, groundLayer);
         Vector3 startPos = transform.position;
         Vector3 endPos = dashPos.position;
         endPos.y = transform.position.y;
+
+        // º® Ã¼Å©
+        Vector2 moveDir = endPos - startPos;
+        RaycastHit2D hit = Physics2D.Raycast(startPos, moveDir.normalized, moveDir.magnitude, groundLayer);
+        if (hit.collider != null) endPos = hit.point + hit.normal * 0.5f;
 
         // Sound
         sound.SoundPlay_Other(1);

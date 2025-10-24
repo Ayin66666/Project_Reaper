@@ -43,6 +43,7 @@ public class Attack_UpperCombo : Attack_Base
         if (hit.collider != null) endPos = hit.point + hit.normal * 2f;
 
         // µ¹Áø
+        boss.sound.SoundPlay_Other(8);
         float timer = 0;
         while (timer < 1)
         {
@@ -111,9 +112,14 @@ public class Attack_UpperCombo : Attack_Base
         body.transform.position = endPos;
     }
 
-    public void Combo_Attack()
+    public void Upper_Attack()
     {
-        attackCollider[0].SetActive(attackCollider[0].activeSelf);
+        attackCollider[1].SetActive(attackCollider[1].activeSelf);
+    }
+
+    public void Combo_Attack(int index)
+    {
+        attackCollider[index].SetActive(attackCollider[index].activeSelf);
     }
 
     public void SwordAura()

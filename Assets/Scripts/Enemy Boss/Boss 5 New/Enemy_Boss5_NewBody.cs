@@ -21,6 +21,27 @@ public class Enemy_Boss5_NewBody : MonoBehaviour
     {
         boss.LookAt();
     }
+    
+    public void Public_Sound(int index)
+    {
+        if(index == 0)
+        {
+            boss.sound.SoundPlay_public(Enemy_Sound.PublicSound.Spawn);
+        }
+        else if(index == 1)
+        {
+            boss.sound.SoundPlay_public(Enemy_Sound.PublicSound.Hit);
+        }
+        else
+        {
+            boss.sound.SoundPlay_public(Enemy_Sound.PublicSound.Die);
+        }
+    }
+
+    public void Sound(int index)
+    {
+        boss.sound.SoundPlay_Other(index);
+    }
 
 
     #region Spawn & Die
@@ -94,9 +115,10 @@ public class Enemy_Boss5_NewBody : MonoBehaviour
         ((Attack_UpperCombo)attack[4]).Movement();
     }
 
-    public void UpperComboCollider()
+
+    public void UpperComboCollider(int index)
     {
-        ((Attack_UpperCombo)attack[4]).Combo_Attack();
+        ((Attack_UpperCombo)attack[4]).Combo_Attack(index);
     }
 
     public void UpperComboSwordAura()

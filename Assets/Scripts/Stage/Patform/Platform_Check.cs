@@ -16,6 +16,31 @@ public class Platform_Check : MonoBehaviour
         isActivate = false;
     }
 
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        switch (type)
+        {
+            case Type.First:
+                if (collision.CompareTag("Player") && !isActivate)
+                {
+                    platform.NextPlatformOn(nextPlatformIndex);
+                }
+                break;
+
+            case Type.Normal:
+                if (collision.CompareTag("Player") && !isActivate)
+                {
+                    isActivate = true;
+                    platform.NextPlatformOn(nextPlatformIndex);
+                }
+                break;
+
+            case Type.Last:
+                break;
+        }
+    }
+
+    /*
     private void OnTriggerEnter2D(Collider2D collision)
     {
         switch (type)
@@ -39,4 +64,5 @@ public class Platform_Check : MonoBehaviour
                 break;
         }
     }
+    */
 }

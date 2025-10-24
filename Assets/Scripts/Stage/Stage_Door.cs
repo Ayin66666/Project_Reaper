@@ -15,15 +15,8 @@ public class Stage_Door : MonoBehaviour
 
     public void Door_Setting(bool isOn)
     {
-        if(curCoroutine != null) StopCoroutine(curCoroutine);
-        if (isOn)
-        {
-            curCoroutine = StartCoroutine(DoorMove(movePos[1].position, true));
-        }
-        else
-        {
-            curCoroutine = StartCoroutine(DoorMove(movePos[0].position, false));
-        }
+        if (curCoroutine != null) StopCoroutine(curCoroutine);
+        curCoroutine = StartCoroutine(DoorMove(movePos[isOn ? 1 : 0].position, isOn));
     }
 
     private IEnumerator DoorMove(Vector2 pos, bool isOn)
@@ -41,8 +34,8 @@ public class Stage_Door : MonoBehaviour
             doorObject.transform.position = Vector2.Lerp(startPos, endPos, EasingFunctions.OutExpo(timer));
             yield return null;
         }
-
+        doorObject.transform.position = endPos;
         // Door Off
-        if(!isOn) doorCollider.enabled = false;
+        if (!isOn) doorCollider.enabled = false;
     }
 }

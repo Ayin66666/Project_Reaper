@@ -11,11 +11,17 @@ public class Enemy_Normal_Object : Enemy_Base
     [Header("---Boss VFX---")]
     [SerializeField] private GameObject spawnBossVFX;
     [SerializeField] private GameObject dieBossVFX;
+
+    [Header("---Component---")]
+    [SerializeField] private LineRenderer line;
+    private Coroutine lineCoroutine;
+
+
     private void Start()
     {
         Status_Setting();
         Spawn();
-        if(enemyType == EnemyType.Object)
+        if (enemyType == EnemyType.Object)
         {
             statusUI_Normal.Status_Setting();
         }
@@ -35,6 +41,7 @@ public class Enemy_Normal_Object : Enemy_Base
         {
             // Normal Obejct
             spawnVFX.SetActive(true);
+            lineCoroutine = StartCoroutine(Line());
             while (spawnVFX.activeSelf)
             {
                 yield return null;
@@ -54,8 +61,21 @@ public class Enemy_Normal_Object : Enemy_Base
         state = State.Idle;
     }
 
+    private IEnumerator Line()
+    {
+        line.SetPosition(0, bodyObj.transform.position);
+        while (state != State.Die)
+        {
+            line.SetPosition(1, Player_Container_Script.instance.player.transform.position);
+            yield return null;
+        }
+    }
+
     public override void Die()
     {
+        if (hitStopCoroutine != null) StopCoroutine(hitStopCoroutine);
+        if (lineCoroutine != null) StopCoroutine(lineCoroutine);
+
         hitStopCoroutine = StartCoroutine(DieCall());
     }
 
@@ -63,7 +83,8 @@ public class Enemy_Normal_Object : Enemy_Base
     {
         state = State.Die;
 
-        if(enemyType == EnemyType.Object)
+        line.enabled = false;
+        if (enemyType == EnemyType.Object)
         {
             dieVFX.SetActive(true);
             while (dieVFX.activeSelf)
@@ -85,6 +106,6 @@ public class Enemy_Normal_Object : Enemy_Base
 
     protected override void Stagger()
     {
-        Debug.Log("Call");
+        // Debug.Log("Call");
     }
 }
