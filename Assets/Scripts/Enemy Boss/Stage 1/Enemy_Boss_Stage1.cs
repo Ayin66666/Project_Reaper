@@ -212,7 +212,7 @@ public class Enemy_Boss_Stage1 : Enemy_Base
 
     public void ComboA()
     {
-        comboAttackCollider[0].SetActive(comboAttackCollider[0].activeSelf ? false : true);
+        comboAttackCollider[0].SetActive(!comboAttackCollider[0].activeSelf);
         if (!comboAttackCollider[0].activeSelf)
         {
             sound.SoundPlay_Other(0);
@@ -388,7 +388,7 @@ public class Enemy_Boss_Stage1 : Enemy_Base
 
     public void TeleportSlashColliderB()
     {
-        teleportSlashCollider[0].SetActive(teleportSlashCollider[1].activeSelf ? false : true);
+        teleportSlashCollider[1].SetActive(teleportSlashCollider[1].activeSelf ? false : true);
 
         // Sound
         if (!teleportSlashCollider[1].activeSelf)
@@ -608,6 +608,8 @@ public class Enemy_Boss_Stage1 : Enemy_Base
         isInvincibility = true;
         Player_Status.instance.canMove = false;
 
+        Stage_Manager.instance.BGM_Setting(1);
+
         // Spawn UI
         statusUI_Boss.StartFadeCall();
 
@@ -682,6 +684,9 @@ public class Enemy_Boss_Stage1 : Enemy_Base
             yield return null;
         }
         */
+
+        Stage_Manager.instance.BGM_Setting(0);
+
 
         // Delay
         yield return new WaitForSeconds(0.5f);

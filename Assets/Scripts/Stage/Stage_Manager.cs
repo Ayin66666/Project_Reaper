@@ -8,10 +8,13 @@ using UnityEngine.UI;
 public class Stage_Manager : MonoBehaviour
 {
 
+    public static Stage_Manager instance;
+
     [Header("---Start Setting---")]
     [SerializeField] private Transform start_Pos;
     [SerializeField] private AudioSource bgmSound;
     [SerializeField] private bool haveStartBGM;
+    [SerializeField] private AudioClip[] bgm;
     [SerializeField] private string startT1;
     [SerializeField] private string startT2;
     public bool isUI;
@@ -62,23 +65,16 @@ public class Stage_Manager : MonoBehaviour
     private bool isNext = false;
 
 
-    private IEnumerator Fade(bool isOn, float speed)
+    private void Awake()
     {
-        isFade = true;
-        fadeCanvasGroup.gameObject.SetActive(true);
-        float start = isOn ? 0 : 1;
-        float end = isOn ? 1 : 0;
-        float timer = 0;
-        while (timer < 1)
+        if (instance == null)
         {
-            timer += Time.deltaTime / speed;
-            fadeCanvasGroup.alpha = Mathf.Lerp(start, end, EasingFunctions.OutExpo(timer));
-            yield return null;
+            instance = this;
         }
-        fadeCanvasGroup.alpha = end;
-
-        if (!isOn) fadeCanvasGroup.gameObject.SetActive(false);
-        isFade = false;
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
     private void Start()
@@ -93,7 +89,7 @@ public class Stage_Manager : MonoBehaviour
         // BGM Play
         if (haveStartBGM)
         {
-            bgmSound.Play();
+            BGM_Setting(0);
         }
 
         // Start UI
@@ -105,6 +101,12 @@ public class Stage_Manager : MonoBehaviour
         Timer();
     }
 
+
+    public void BGM_Setting(int index)
+    {
+        bgmSound.clip = bgm[index];
+        bgmSound.Play();
+    }
 
     private IEnumerator StartUI()
     {
@@ -146,6 +148,25 @@ public class Stage_Manager : MonoBehaviour
     public void Room_Clear()
     {
         StartCoroutine(Room_ClearCall());
+    }
+
+    private IEnumerator Fade(bool isOn, float speed)
+    {
+        isFade = true;
+        fadeCanvasGroup.gameObject.SetActive(true);
+        float start = isOn ? 0 : 1;
+        float end = isOn ? 1 : 0;
+        float timer = 0;
+        while (timer < 1)
+        {
+            timer += Time.deltaTime / speed;
+            fadeCanvasGroup.alpha = Mathf.Lerp(start, end, EasingFunctions.OutExpo(timer));
+            yield return null;
+        }
+        fadeCanvasGroup.alpha = end;
+
+        if (!isOn) fadeCanvasGroup.gameObject.SetActive(false);
+        isFade = false;
     }
 
     private IEnumerator Room_ClearCall()
@@ -272,12 +293,13 @@ public class Stage_Manager : MonoBehaviour
         }
     }
 
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.CompareTag("Player") && !isNext)
         {
             StartCoroutine(Next());
-           
+
             /*
             if (!playerList.Contains(collision.gameObject))
             {

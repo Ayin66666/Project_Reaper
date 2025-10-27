@@ -12,6 +12,8 @@ public abstract class Stage_Room_Base : MonoBehaviour
     [SerializeField] protected bool haveTarp;
     [SerializeField] protected bool haveSpawn;
     [SerializeField] protected bool haveObject;
+    [SerializeField] protected bool haveBGM;
+    [SerializeField] protected int bgmIndex;
     public bool isActivate;
     public bool isRoomClear;
 

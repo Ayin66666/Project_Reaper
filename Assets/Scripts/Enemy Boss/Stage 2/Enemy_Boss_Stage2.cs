@@ -1041,6 +1041,9 @@ public class Enemy_Boss_Stage2 : Enemy_Base
     {
         state = State.Spawn;
         isInvincibility = true;
+        Player_Status.instance.canMove = false;
+
+        Stage_Manager.instance.BGM_Setting(1);
 
         // Spawn UI
         statusUI_Boss.StartFadeCall();
@@ -1060,6 +1063,7 @@ public class Enemy_Boss_Stage2 : Enemy_Base
 
         state = State.Idle;
         isInvincibility = false;
+        Player_Status.instance.canMove = true;
     }
 
     protected override void Stagger()
@@ -1110,6 +1114,8 @@ public class Enemy_Boss_Stage2 : Enemy_Base
             yield return null;
         }
         */
+
+        Stage_Manager.instance.BGM_Setting(0);
 
         // Delay
         yield return new WaitForSeconds(0.25f);

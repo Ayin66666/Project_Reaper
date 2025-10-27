@@ -149,6 +149,8 @@ public class Enemy_Boss5_New : Enemy_Base
     private IEnumerator SpawnCall()
     {
         state = State.Spawn;
+        isInvincibility = true;
+        Player_Status.instance.canMove = false;
 
         // 기본 셋팅
         Target_Setting();
@@ -170,6 +172,8 @@ public class Enemy_Boss5_New : Enemy_Base
 
         // 동작
         state = State.Idle;
+        isInvincibility = false;
+        Player_Status.instance.canMove = true;
         Think();
     }
 
@@ -215,6 +219,8 @@ public class Enemy_Boss5_New : Enemy_Base
 
         // UI Off
         statusUI_Boss.Die();
+
+        Stage_Manager.instance.BGM_Setting(0);
 
         // 페이드 인
         ((Attack_HaifMoon)attack[5]).BackgroundFade(true, 1f);

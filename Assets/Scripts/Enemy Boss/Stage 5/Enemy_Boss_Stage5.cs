@@ -1811,6 +1811,9 @@ public class Enemy_Boss_Stage5 : Enemy_Base
     {
         state = State.Spawn;
         isInvincibility = true;
+        Player_Status.instance.canMove = false;
+
+        Stage_Manager.instance.BGM_Setting(1);
 
         // Sound
         sound.SoundPlay_public(Enemy_Sound.PublicSound.Spawn);
@@ -1833,6 +1836,7 @@ public class Enemy_Boss_Stage5 : Enemy_Base
 
         state = State.Idle;
         isInvincibility = false;
+        Player_Status.instance.canMove = true;
     }
 
     protected override void Stagger()
@@ -1915,6 +1919,8 @@ public class Enemy_Boss_Stage5 : Enemy_Base
             comboCollider[i].SetActive(false);
         }
 
+        Stage_Manager.instance.BGM_Setting(0);
+
         // Sound
         sound.SoundPlay_public(Enemy_Sound.PublicSound.Die);
 
@@ -1934,7 +1940,7 @@ public class Enemy_Boss_Stage5 : Enemy_Base
             yield return null;
         }
         */
-
+        
         // Delay
         yield return new WaitForSeconds(1f);
 

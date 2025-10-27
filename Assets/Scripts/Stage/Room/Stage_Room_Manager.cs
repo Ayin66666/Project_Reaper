@@ -27,7 +27,7 @@ public class Stage_Room_Manager : Stage_Room_Base
                 platform[i].PlatformActivate(true);
             }
         }
-
+        
         // Trap
         if (haveTarp)
         {
@@ -53,6 +53,12 @@ public class Stage_Room_Manager : Stage_Room_Base
                 objectDoor[i].gameObject.SetActive(true);
                 objectDoor[i].Object_Setting();
             }
+        }
+
+        // BGM
+        if(haveBGM)
+        {
+            Stage_Manager.instance.BGM_Setting(bgmIndex);
         }
 
 
