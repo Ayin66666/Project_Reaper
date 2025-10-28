@@ -55,12 +55,6 @@ public class Stage_Room_Manager : Stage_Room_Base
             }
         }
 
-        // BGM
-        if(haveBGM)
-        {
-            Stage_Manager.instance.BGM_Setting(bgmIndex);
-        }
-
 
         switch (roomType)
         {

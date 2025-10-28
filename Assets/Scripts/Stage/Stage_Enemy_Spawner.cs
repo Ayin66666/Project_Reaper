@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 
 public class Stage_Enemy_Spawner : MonoBehaviour
@@ -28,10 +29,16 @@ public class Stage_Enemy_Spawner : MonoBehaviour
     [SerializeField] private float timer;
 
 
-    [Header("---Boss Spawn SEtting---")]
+    [Header("---Boss Spawn Setting---")]
     [SerializeField] private GameObject boss;
     private Coroutine curCorouttine;
     private Coroutine curCheckCoroutine;
+
+
+    [Header("---EnemyCount---")]
+    [SerializeField] protected GameObject enemyCountSet;
+    [SerializeField] protected Text enemyCountText;
+    [SerializeField] protected bool haveEnemyCount;
 
 
     public void Spawn()
@@ -70,6 +77,8 @@ public class Stage_Enemy_Spawner : MonoBehaviour
 
     private IEnumerator End_Spawn()
     {
+        enemyCountSet.SetActive(false);
+
         // Stop Spawn Systeam
         StopCoroutine(curCorouttine);
         isSpawn = false;
@@ -99,6 +108,8 @@ public class Stage_Enemy_Spawner : MonoBehaviour
             }
 
             enemyCount = enemys.Count;
+            if(enemyCountSet.activeSelf)
+                enemyCountText.text = $"남은 몬스터 : {enemyCount}";
 
             // Check Delay
             yield return new WaitForSeconds(spawnerCheckDelay);
@@ -109,6 +120,9 @@ public class Stage_Enemy_Spawner : MonoBehaviour
     {
         // Spawn
         enemyCount = enemys.Count;
+        enemyCountSet.SetActive(true);
+        enemyCountText.text = $"남은 몬스터 : {enemyCount}";
+
         for (int i = 0; i < enemys.Count; i++)
         {
             // 이펙트
@@ -132,8 +146,11 @@ public class Stage_Enemy_Spawner : MonoBehaviour
     private IEnumerator Spawn_Phase()
     {
         // Spawn -> 몇 번에 걸쳐 나눠 소환되는가 ?
+        enemyCountSet.SetActive(true);
+
         for (int i = 0; i < spawnCount.Length; i++)
         {
+            enemyCountText.text = $"남은 페이즈 : {spawnCount.Length - i}";
             // Spawn -> 몇 마리 소환할건가 ?
             for (int i2 = 0; i2 < spawnCount[i]; i2++)
             {
@@ -205,19 +222,27 @@ public class Stage_Enemy_Spawner : MonoBehaviour
     private IEnumerator Object_Check()
     {
         float count = enemy_Object.Count;
+
+        enemyCountSet.SetActive(true);
+        enemyCountText.text = $"남은 오브젝트 수 : {count}";
+
         while (count > 0)
         {
             // Object Check
             for (int i = 0; i < enemy_Object.Count; i++)
             {
-                // Object Spawn
+                // 오브젝트 소환
                 enemy_Object[i].SetActive(true);
+
+                // 파괴 대기
                 while (enemy_Object[i] != null)
                 {
                     yield return null;
                 }
 
+                // 최신화
                 count--;
+                enemyCountText.text = $"남은 오브젝트 수 : {count}";
             }
 
             // Check Delay

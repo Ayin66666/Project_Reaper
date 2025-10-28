@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public abstract class Stage_Room_Base : MonoBehaviour
 {
@@ -12,8 +13,6 @@ public abstract class Stage_Room_Base : MonoBehaviour
     [SerializeField] protected bool haveTarp;
     [SerializeField] protected bool haveSpawn;
     [SerializeField] protected bool haveObject;
-    [SerializeField] protected bool haveBGM;
-    [SerializeField] protected int bgmIndex;
     public bool isActivate;
     public bool isRoomClear;
 
@@ -48,6 +47,7 @@ public abstract class Stage_Room_Base : MonoBehaviour
     [SerializeField] private GameObject[] startDoor;
     [SerializeField] private GameObject[] endDoor;
     [SerializeField] protected Stage_JumpRoom_ClearChecker clearChecker;
+
 
     private void Start()
     {
