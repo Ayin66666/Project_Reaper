@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using Easing;
-using Unity.VisualScripting.Antlr3.Runtime;
+
 
 
 public class Scene_Start_Manager : MonoBehaviour
@@ -23,9 +23,21 @@ public class Scene_Start_Manager : MonoBehaviour
     private bool isFade;
 
 
+    [Header("---Movement---")]
+    [SerializeField] private Vector2 moveSpeed;
+    [SerializeField] private Vector2 delay;
+    [SerializeField] private RectTransform camMovePos;
+    [SerializeField] private RectTransform background;
+
+
+    [Header("---Side Fade---")]
+    [SerializeField] private CanvasGroup sideFade;
+
+
     private void Start()
     {
         StartCoroutine(Fade(false));
+        // StartCoroutine(Background());
     }
 
     public void Update()
@@ -36,6 +48,50 @@ public class Scene_Start_Manager : MonoBehaviour
         }
     }
 
+    private IEnumerator Background()
+    {
+        while (true)
+        {
+            int ran = Random.Range(3, 5);
+            for (int i = 0; i < ran; i++)
+            {
+                Vector2 startPos = background.anchoredPosition;
+                Vector2 endPos = GetmovePos();
+                float timer = 0;
+                float speed = Random.Range(moveSpeed.x, moveSpeed.y);
+
+                while (timer < 1)
+                {
+                    timer += Time.deltaTime / speed;
+                    background.anchoredPosition = Vector2.Lerp(startPos, endPos, timer);
+                    yield return null;
+                }
+            }
+
+            yield return new WaitForSeconds(Random.Range(delay.x, delay.y));
+        }
+    }
+
+    private IEnumerator SideFade()
+    {
+        float start = sideFade.alpha;
+        float end = sideFade.alpha + Random.Range(-0.3f, 0.3f);
+        float timer = 0;
+        while(timer < 1)
+        {
+            timer += Time.deltaTime;
+            yield return null;
+        }
+    }
+
+    private Vector2 GetmovePos()
+    {
+        float x = Random.Range(-camMovePos.sizeDelta.x / 2, camMovePos.sizeDelta.x / 2);
+        float y = Random.Range(-camMovePos.sizeDelta.y / 2, camMovePos.sizeDelta.y / 2);
+        Vector2 movePos = new Vector2(x, y);
+
+        return movePos;
+    }
 
     private IEnumerator Fade(bool isOn)
     {
