@@ -1,13 +1,16 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class Scene_End_Manager : MonoBehaviour
 {
-    [SerializeField] private Text MainText;
-    [SerializeField] private Text PressText;
-    [SerializeField] private Text ThankYouText;
+    [SerializeField] private Image game_Title;
+    [SerializeField] private Text madeByText;
+    [SerializeField] private Text mainText;
+    [SerializeField] private Text pressText;
+    [SerializeField] private Text thankYouText;
+
+    Coroutine myCoroutine;
 
     void Start()
     {
@@ -16,12 +19,36 @@ public class Scene_End_Manager : MonoBehaviour
 
     private IEnumerator Fade()
     {
-        // Main Text
-        float a = 0;
+        float a = 1;
+        yield return new WaitForSeconds(1f);
+
+        // Game Title
+        game_Title.gameObject.SetActive(true);
+        yield return new WaitForSeconds(3f);
+
+        while (a > 0)
+        {
+            a -= Time.deltaTime;
+            game_Title.color = new Color(game_Title.color.r, game_Title.color.g, game_Title.color.b, a);
+            yield return null;
+        }
+
+        yield return new WaitForSeconds(0.5f);
+
+        // Made By Text
         while (a < 1)
         {
             a += Time.deltaTime;
-            MainText.color = new Color(MainText.color.r, MainText.color.g, MainText.color.b, a);
+            madeByText.color = new Color(madeByText.color.r, madeByText.color.g, madeByText.color.b, a);
+            yield return null;
+        }
+
+        // Main Text
+        a = 0;
+        while (a < 1)
+        {
+            a += Time.deltaTime;
+            mainText.color = new Color(mainText.color.r, mainText.color.g, mainText.color.b, a);
             yield return null;
         }
 
@@ -32,16 +59,19 @@ public class Scene_End_Manager : MonoBehaviour
         while (a > 0)
         {
             a -= Time.deltaTime;
-            MainText.color = new Color(MainText.color.r, MainText.color.g, MainText.color.b, a);
+            madeByText.color = new Color(madeByText.color.r, madeByText.color.g, madeByText.color.b, a);
+            mainText.color = new Color(mainText.color.r, mainText.color.g, mainText.color.b, a);
             yield return null;
         }
+
+        yield return new WaitForSeconds(0.5f);
 
         // Thank You Text
         a = 0;
         while (a < 1)
         {
             a += Time.deltaTime;
-            ThankYouText.color = new Color(PressText.color.r, PressText.color.g, PressText.color.b, a);
+            thankYouText.color = new Color(pressText.color.r, pressText.color.g, pressText.color.b, a);
             yield return null;
         }
 
@@ -50,7 +80,7 @@ public class Scene_End_Manager : MonoBehaviour
         while (a < 1)
         {
             a += Time.deltaTime;
-            PressText.color = new Color(PressText.color.r, PressText.color.g, PressText.color.b, a); 
+            pressText.color = new Color(pressText.color.r, pressText.color.g, pressText.color.b, a);
             yield return null;
         }
 

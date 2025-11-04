@@ -367,6 +367,10 @@ public class Enemy_Boss_Stage1 : Enemy_Base
         {
             yield return null;
         }
+        foreach(GameObject obj in teleportSlashCollider)
+        {
+            obj.SetActive(false);
+        }
 
         // µÙ∑π¿Ã
         yield return new WaitForSeconds(delay);

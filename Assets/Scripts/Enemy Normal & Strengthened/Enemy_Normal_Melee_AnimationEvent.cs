@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Enemy_Normal_Melee_AnimationEvent : MonoBehaviour
 {
-    private Enemy_Normal_Melee enemy;
+    [SerializeField] private Enemy_Normal_Melee enemy;
     private Animator anim;
 
     private void Awake()
