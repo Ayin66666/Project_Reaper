@@ -120,7 +120,7 @@ public class Stage_Room_Manager : Stage_Room_Base
     private IEnumerator SpawnCheck()
     {
         // Enemy Spawn
-        spawner.Spawn();
+        if(spawner != null) spawner.Spawn();
 
         // Spawner Check
         if (haveSpawn)
