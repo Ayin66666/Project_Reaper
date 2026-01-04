@@ -1,7 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using Easing;
+using System.Collections;
+using UnityEngine;
 
 public class Boss_Stage5_CenterSlashA : MonoBehaviour
 {

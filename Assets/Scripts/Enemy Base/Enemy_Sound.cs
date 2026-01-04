@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Audio;
 
 
 public class Enemy_Sound : MonoBehaviour
@@ -39,6 +36,7 @@ public class Enemy_Sound : MonoBehaviour
 
     public void SoundPlay_Other(int soundIndex)
     {
+        if (soundIndex > audioClips.Length) return;
         audioSource.PlayOneShot(audioClips[soundIndex]);
     }
 }

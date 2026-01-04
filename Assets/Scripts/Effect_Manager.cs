@@ -1,11 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using Cinemachine;
-//using Cinemachine.Editor;
-using Cinemachine.Utility;
-using UnityEngine.UIElements;
-using Easing;
+using System.Collections;
+using UnityEngine;
 
 public class Effect_Manager : MonoBehaviour
 {

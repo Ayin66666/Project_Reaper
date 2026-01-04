@@ -223,10 +223,6 @@ public abstract class Enemy_Base : MonoBehaviour
             // Attack Type Check
             if (canHitEffect) // -> 이 부분에 에러가 있음 -> 비활성화 되서 동작 안한느듯?
             {
-                if (hitStopCoroutine != null) StopCoroutine(hitStopCoroutine);
-                state = State.Groggy;
-                isAttack = false;
-
                 switch (hitType)
                 {
                     case HitType.None:
@@ -234,21 +230,37 @@ public abstract class Enemy_Base : MonoBehaviour
                         break;
 
                     case HitType.Stagger:
+                        if (hitStopCoroutine != null) StopCoroutine(hitStopCoroutine);
+                        state = State.Groggy;
+                        isAttack = false;
+
                         if (isAirBorne) TimerAdd(t);
                         StopHitMoveCoroutine();
                         break;
 
                     case HitType.AirBorne:
+                        if (hitStopCoroutine != null) StopCoroutine(hitStopCoroutine);
+                        state = State.Groggy;
+                        isAttack = false;
+
                         StopHitMoveCoroutine();
                         hitAirborneCoroutine = StartCoroutine(AirBorneMove(pos, t));
                         break;
 
                     case HitType.DownAttack:
+                        if (hitStopCoroutine != null) StopCoroutine(hitStopCoroutine);
+                        state = State.Groggy;
+                        isAttack = false;
+
                         StopHitMoveCoroutine();
                         hitDownAttackCoroutine = StartCoroutine(DownAttackMove(t));
                         break;
 
                     case HitType.KnockBack:
+                        if (hitStopCoroutine != null) StopCoroutine(hitStopCoroutine);
+                        state = State.Groggy;
+                        isAttack = false;
+
                         if (isAirBorne) TimerAdd(t);
                         StopHitMoveCoroutine();
                         hitKnockbackCoroutine = StartCoroutine(KnockBackMove(player, t));

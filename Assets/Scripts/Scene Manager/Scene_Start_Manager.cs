@@ -142,12 +142,14 @@ public class Scene_Start_Manager : MonoBehaviour
     {
         StartCoroutine(Fade(true));
         yield return new WaitWhile(() => isFade);
-        Scene_Loading_Manager.LoadScene("Scene_Tutorial");
+        //Scene_Loading_Manager.LoadScene("Scene_Tutorial");
+        Scene_Loading_Manager.LoadScene("Scene_Stage2");
     }
 
     public void Click_Room()
     {
-        Scene_Loading_Manager.LoadScene("Scene_Tutorial");
+        //Scene_Loading_Manager.LoadScene("Scene_Tutorial");
+        Scene_Loading_Manager.LoadScene("Scene_Stage2");
     }
 
     public void Click_Option()

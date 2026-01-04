@@ -27,18 +27,15 @@ public class Attack_Combo : Attack_Base
 
     private IEnumerator UseCall()
     {
-        Debug.Log("코루틴 호출됨!");
         isUsed = true;
 
         anim.SetTrigger("Action");
         anim.SetBool("isCombo", true);
         while (anim.GetBool("isCombo"))
         {
-            Debug.Log("콤보 대기중");
             yield return null;
         }
 
-        Debug.Log("코루틴 종료");
         isUsed = false;
     }
 

@@ -1,7 +1,5 @@
 using Easing;
-using System;
 using System.Collections;
-using UnityEditor.Rendering;
 using UnityEngine;
 
 
@@ -26,6 +24,7 @@ public class Attack_AOE : Attack_Base
     private IEnumerator UseCall()
     {
         isUsed = true;
+        Vector3 bodyPos = boss.transform.position;
 
         // 차징
         chargeVFX.SetActive(true);
@@ -115,8 +114,7 @@ public class Attack_AOE : Attack_Base
         boss.Body_Setting(true);
 
         // 착지 - 하강 애니메이션
-        hit = Physics2D.Raycast(body.transform.position, Vector2.down, 50, groundLayer);
-        body.transform.position = hit.point;
+        body.transform.position = bodyPos;
         boss.Rigid_Setting(true);
         teleportVFX.SetActive(true);
 

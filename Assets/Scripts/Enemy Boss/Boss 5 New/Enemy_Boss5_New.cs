@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-
 [System.Serializable]
 public class PattenData
 {
@@ -45,9 +44,9 @@ public class Enemy_Boss5_New : Enemy_Base
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.P))
         {
-            TakeDamage(gameObject, 8888, 1, true, HitType.None, 0, transform.position);
+            TakeDamage(gameObject, 500, 1, true, HitType.None, 0, transform.position);
         }
     }
 
@@ -86,7 +85,7 @@ public class Enemy_Boss5_New : Enemy_Base
             yield return new WaitWhile(() => attack[index].isUsed);
 
             // 다음 공격 딜레이
-            yield return new WaitForSeconds(0.15f);
+            yield return new WaitForSeconds(0.25f);
         }
 
         // 판단 딜레이

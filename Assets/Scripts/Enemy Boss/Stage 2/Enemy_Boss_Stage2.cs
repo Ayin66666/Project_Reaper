@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Easing;
-using Unity.VisualScripting;
+
 
 public class Enemy_Boss_Stage2 : Enemy_Base
 {
@@ -13,10 +13,12 @@ public class Enemy_Boss_Stage2 : Enemy_Base
     [SerializeField] private GameObject container;
     [SerializeField] private float hitTimer;
     [SerializeField] private bool isPhase2;
+    [SerializeField] private bool isPhaseChange;
+    [SerializeField] private bool isCombo;
     private int attackCount;
-    private bool isCombo;
     private bool isWall;
     private Vector3 endPos;
+
 
     [Header("---Move Pos---")]
     [SerializeField] private Transform comboMovePos;
@@ -24,6 +26,7 @@ public class Enemy_Boss_Stage2 : Enemy_Base
     [SerializeField] private Transform groundRushPos;
     [SerializeField] private Transform[] airRushPos1;
     [SerializeField] private Transform[] airRushPos2;
+
 
     [Header("---Exlposion Pos---")]
     [SerializeField] private Transform[] airRushShotPos;
@@ -41,6 +44,7 @@ public class Enemy_Boss_Stage2 : Enemy_Base
     public GameObject airRushCollider;
     public GameObject backstepcollider;
     public GameObject superCollider;
+
 
     [Header("---Prefab---")]
     [SerializeField] private GameObject explosion;
@@ -83,6 +87,7 @@ public class Enemy_Boss_Stage2 : Enemy_Base
     // 6 : Super A
     // 7 : Super B
 
+
     private void Start()
     {
         line = GetComponent<LineRenderer>();
@@ -93,15 +98,6 @@ public class Enemy_Boss_Stage2 : Enemy_Base
 
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.J))
-        {
-            StartCoroutine(BackstepSlash());
-        }
-
-        Vector3 rayDir = (backstepPos.position - transform.position).normalized;
-        Vector3 rayStart = new Vector3(transform.position.x, transform.position.y, transform.position.z);
-        Debug.DrawRay(rayStart, rayDir, Color.red, (backstepPos.position - transform.position).magnitude);
-        
         // Spawn & Die Check
         if (state == State.Spawn || state == State.Die)
         {
@@ -110,12 +106,6 @@ public class Enemy_Boss_Stage2 : Enemy_Base
 
         WallCheck();
         GroundCheck();
-
-        // Phase 2 Check
-        if(!isPhase2 && hp <= 500)
-        {
-            StartCoroutine(Phase2On());
-        }
 
         // Find Target & Reset Enemy
         if (!haveTarget)
@@ -127,13 +117,16 @@ public class Enemy_Boss_Stage2 : Enemy_Base
             }
         }
 
-        if (state == State.Idle && !isAttack && !isDie && !isCombo)
+        // Phase 2 Check
+        if (hp < 500 && !isPhase2)
         {
-             Think();
+            if (hitStopCoroutine != null) StopCoroutine(hitStopCoroutine);
+            StartCoroutine(Phase2On());
         }
-        else
-        {
-            return;
+
+        if (state == State.Idle && !isAttack && !isDie && !isCombo && !isPhaseChange)
+        {    
+            Think();
         }
     }
 
@@ -141,6 +134,16 @@ public class Enemy_Boss_Stage2 : Enemy_Base
     {
         state = State.Think;
 
+        foreach(string s in animationTrigger)
+        {
+            anim.ResetTrigger(s);
+        }
+        foreach(string s in animationbool)
+        {
+            anim.SetBool(s, false);
+        }
+
+        if (hitStopCoroutine != null) StopCoroutine(hitStopCoroutine);
         if(attackCount >= 10)
         {
             int ran = Random.Range(0, 100);
@@ -454,6 +457,7 @@ public class Enemy_Boss_Stage2 : Enemy_Base
 
     private IEnumerator CounterWait()
     {
+        state = State.Attack;
         anim.SetTrigger("Attack");
         anim.SetBool("isCountWait", true);
         anim.SetBool("isCount", true);
@@ -504,6 +508,7 @@ public class Enemy_Boss_Stage2 : Enemy_Base
         state = State.Attack;
         isAttack = true;
         attackCount++;
+        isInvincibility = true;
 
         // Target Look -> 애니메이션이 반대로 들어가 있어서 이렇게 만듬
         CurTarget_Check();
@@ -519,8 +524,11 @@ public class Enemy_Boss_Stage2 : Enemy_Base
 
         // Delay F
         yield return new WaitForSeconds(0.25f);
+        isInvincibility = false;
+        anim.ResetTrigger("Attack");
+        anim.SetBool("isCount", false);
 
-        // Animation Wait
+        // Attack
         anim.SetTrigger("Attack");
         anim.SetBool("isCountSlash", true);
         while(anim.GetBool("isCountSlash"))
@@ -528,6 +536,7 @@ public class Enemy_Boss_Stage2 : Enemy_Base
             yield return null;
         }
 
+        yield return new WaitForSeconds(0.1f);
         isAttack = false;
 
         // Next Attack Setting
@@ -544,11 +553,11 @@ public class Enemy_Boss_Stage2 : Enemy_Base
         {
             hitStopCoroutine = StartCoroutine(ComboC());
         }
-        else if (ran <= 60)
+        else if (ran <= 80)
         {
             hitStopCoroutine = StartCoroutine(ComboC_New());
         }
-        else if (ran <= 60)
+        else
         {
             hitStopCoroutine = StartCoroutine(ComboD());
         }
@@ -1003,10 +1012,20 @@ public class Enemy_Boss_Stage2 : Enemy_Base
     private IEnumerator Phase2On()
     {
         state = State.Spawn;
+        isInvincibility = true;
         isAttack = false;
+        isCombo = false;
         isPhase2 = true;
-        delay *= 0.75f;
+        isPhaseChange = true;
+        delay *= 0.85f;
         hitTimer = 0.5f;
+
+        // 애니메이션 리셋
+        anim.ResetTrigger("Attack");
+        foreach(string s in animationbool)
+        {
+            anim.SetBool(s, false);
+        }
 
         // Animation
         anim.SetTrigger("Phase2");
@@ -1014,7 +1033,7 @@ public class Enemy_Boss_Stage2 : Enemy_Base
         anim.SetFloat("AttackSpeed", 1.25f);
 
         // Sound
-        sound.SoundPlay_Other(8);
+        // sound.SoundPlay_Other(5);
 
         // Animaton Wait
         while (anim.GetBool("isPhase2"))
@@ -1022,9 +1041,9 @@ public class Enemy_Boss_Stage2 : Enemy_Base
             yield return null;
         }
 
-        // Delay
-        yield return new WaitForSeconds(0.25f);
         state = State.Idle;
+        isInvincibility = false;
+        isPhaseChange = false;
     }
 
     private void WallCheck()
@@ -1096,6 +1115,13 @@ public class Enemy_Boss_Stage2 : Enemy_Base
         // Sound
         sound.SoundPlay_public(Enemy_Sound.PublicSound.Die);
 
+        // 애니메이션 리셋
+        anim.ResetTrigger("Attack");
+        foreach (string s in animationbool)
+        {
+            anim.SetBool(s, false);
+        }
+
         // Animation
         anim.SetTrigger("Die");
         anim.SetBool("isDie", true);
@@ -1105,15 +1131,6 @@ public class Enemy_Boss_Stage2 : Enemy_Base
         {
             yield return null;
         }
-
-        /*
-        // UI Call
-        stage_Manager.Stage_Clear();
-        while (stage_Manager.isUI)
-        {
-            yield return null;
-        }
-        */
 
         Stage_Manager.instance.BGM_Setting(0);
 

@@ -59,10 +59,11 @@ public class Stage_Room_Manager : Stage_Room_Base
         switch (roomType)
         {
             case RoomType.Normal:
-                StartCoroutine(SpawnCheck());
+                if(trapActivateType != Trap_ActivateType.Timer) StartCoroutine(SpawnCheck());
                 break;
 
             case RoomType.Jump:
+                Debug.Log("·ëÅ×½ºÆ®1");
                 StartCoroutine(Room_Check_TypeJump());
                 break;
 

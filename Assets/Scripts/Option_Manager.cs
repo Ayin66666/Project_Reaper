@@ -113,6 +113,12 @@ public class Option_Manager : MonoBehaviour
     {
         isExitOn = false;
         exitSet.SetActive(false);
+        if(SceneManager.GetActiveScene().name != "Scene_Start")
+        {
+            menuSet.SetActive(false);
+            isMenuOn = false;
+            Scene_Loading_Manager.LoadScene("Scene_Start");
+        }
         Sound_Manager.instance.SFXPlay_OneShot(Sound_Manager.instance.onClick);
     }
 

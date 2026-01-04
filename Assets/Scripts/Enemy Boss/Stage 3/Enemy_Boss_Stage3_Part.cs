@@ -1,8 +1,5 @@
 using System.Collections;
-using System.Collections.Generic;
-using UnityEditor.Rendering.LookDev;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 
 public class Enemy_Boss_Stage3_Part : Enemy_Base
 {

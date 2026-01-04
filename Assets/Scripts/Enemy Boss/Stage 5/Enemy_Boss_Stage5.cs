@@ -1,8 +1,7 @@
+using Easing;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using Easing;
 
 public class Enemy_Boss_Stage5 : Enemy_Base
 {

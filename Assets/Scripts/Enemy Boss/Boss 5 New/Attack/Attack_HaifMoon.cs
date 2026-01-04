@@ -39,6 +39,7 @@ public class Attack_HaifMoon : Attack_Base
     private IEnumerator UseCall()
     {
         isUsed = true;
+        Vector3 bodyPos = boss.transform.position;
 
         anim.SetTrigger("Action");
         anim.SetBool("isHaifMoonCharge", true);
@@ -116,9 +117,7 @@ public class Attack_HaifMoon : Attack_Base
 
         // 내려오기
         anim.SetTrigger("Action");
-        RaycastHit2D hit = Physics2D.Raycast(body.transform.position, Vector2.down, 50, groundLayer);
-        Vector3 landPos = hit.point + Vector2.up * 0.5f;
-        body.transform.position = landPos;
+        body.transform.position = bodyPos;
         Instantiate(teleportVFX, body.transform.position, Quaternion.identity);
         boss.Rigid_Setting(true);
 
